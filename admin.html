@@ -15,19 +15,59 @@
   <link href="https://fonts.cdnfonts.com/css/gagalin" rel="stylesheet">
 
     /* Fixed missing semicolons in background-color/color */
-    body { 
-      background-color:var(--bg-color); 
-      color: var(--text-light); 
-      font-family: GAGALIN; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      min-height: 100vh; 
-      margin: 0; 
-      padding: 10px; 
-      box-sizing: border-box; 
-      -webkit-tap-highlight-color: transparent; 
+style>
+    body { background-color: var(--bg-color); color: var(--medium-accent); font-family: sans serif display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    h1, h2, h3, h4 { color: var(--medium-accent); font-family: 'GAGALIN', cursive; letter-spacing: 1px; font-weight: normal; margin-top: 0;}
+    .screen { background-color: var(--text-ligh); padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); text-align: center; width: 100%; max-width: 400px; }
+    #dashboard-screen, #task-screen { display: none; width: 100%; max-width: 600px; }
+   .app-logo { 
+      width: 140px; 
+      height: auto; 
+      margin-bottom: 15px; 
+      border-radius: 12px; 
+      box-shadow: 0 4px 8px rgba(128, 0, 0, 0.2); 
     }
+    input { padding: 12px; margin: 10px 0 20px 0; border-radius: 5px; border: 1px solid var(--medium-accent); width: 85%; font-size: 1rem; color: var(--medium-accent); }
+    button { background-color: var(--bg-color); color: var(--medium-accent); border: 3px solid maroon; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
+    button:active { background-color: var(--medium-accent); color: var(--bg-color); transform: scale(0.95); }
+    .login-btn { width: 90%; padding: 12px; }
+    .save-exit-btn { background-color: var(--medium-accent); color: var(--bg-color); padding: 10px 20px; font-size: 1.2rem; margin-top: 20px; }
+    
+    .exit-app-btn { background-color: var(--medium-accent); var(--bg-color);  padding: 10px 20px; font-size: 1.1rem; margin-top: 30px; }
+    
+    .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+    .category-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px 10px; height: 100%; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; background-color: white; }
+    th, td { padding: 10px 5px; border-bottom: 2px solid rgba(128,0,0,0.1); font-size: 0.9rem;}
+    th { font-family: 'Gagalin', sans-serif; color: maroon; text-align: center; }
+    .status-toggle { cursor: pointer; }
+    .forest-tick { color: forestgreen; font-size: 1.5rem; }
+    .maroon-tick { color: var(--medium-accent); font-size: 1.5rem; }
+    .gray-cloud { background-color: #f0f0f0; color: #777; font-size: 0.7rem; padding: 3px 6px; border-radius: 10px; }
+    .progress-container { width: 100%; background-color: rgba(128, 0, 0, 0.1); border-radius: 5px; height: 8px; margin-top: 8px; overflow: hidden; }
+    .progress-fill { background-color: limegreen; height: 100%; transition: width 0.3s ease; }
+    
+    #task-progress-wrapper { height: 12px; margin-bottom: 15px; }
+
+    /* NEW: Audio Button Styling */
+    .audio-btn { background-color: #3498db; color: white; border: 2px solid #2980b9; padding: 4px 8px; font-size: 0.7rem; border-radius: 5px; margin-top: 8px; margin-left: 0; display: inline-block; font-family: sans-serif; letter-spacing: 0; }
+    .audio-btn:active { background-color: #2980b9; transform: scale(0.95); }
+    .audio-playing { background-color: #e67e22; border-color: #d35400; } /* Turns Orange when playing */
+
+    .quote-box { 
+      margin-top: 30px; 
+      margin-bottom: 20px; 
+      font-size: 1rem; /* Fixed: Removed the dot before rem */
+      font-family: 'Comic Sans MS';
+      font-style: normal;
+      color: maroon; /* Fixed: Changed from HTML inline style to proper CSS property */
+      line-height: 1.4; 
+      padding: 20px 10px 20px 10px; /* Fixed: Combined your padding rules (Top, Right, Bottom, Left) */
+      min-height: 40px;
+      border: 1px dashed maroon; /* Added the missing semicolon at the end */
+      border-radius: 12px; 
+    }
+
     
     h1, h2, h3, h4 { color: var(--medium-accent); font-family: 'GAGALIN', cursive; letter-spacing: 1px; font-weight: normal; margin-top: 0;}
     .screen { background-color: #34495e; padding: 30px; border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.3); text-align: center; width: 90%; max-width: 400px; }
