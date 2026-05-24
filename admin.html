@@ -10,12 +10,15 @@
       --medium-accent: #8BAE66;
       --text-light: #EBD5AB;
     }
-    
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.cdnfonts.com/css/gagalin" rel="stylesheet">
+
     /* Fixed missing semicolons in background-color/color */
     body { 
-      background-color: #2c3e50; 
-      color: white; 
-      font-family: sans-serif; 
+      background-color:var(--bg-color); 
+      color: var(--text-light); 
+      font-family: GAGALIN; 
       display: flex; 
       justify-content: center; 
       align-items: center; 
@@ -39,13 +42,13 @@
     #dashboard-content {
       margin-top: 20px;
       text-align: left;
-      background: #2c3e50;
+      background: var(--bg-color);
       padding: 15px;
       border-radius: 8px;
     }
     .student-item {
       padding: 8px;
-      border-bottom: 1px solid #7f8c8d;
+      border-bottom: 1px solid var(--text-light);
     }
   </style>
 </head>
