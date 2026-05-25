@@ -15,15 +15,16 @@
     .screen { display: none; background-color: #424242; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); text-align: center; width: 100%; max-width: 600px; }
     #login-screen { display: block; max-width: 400px; } /* Login is explicitly visible on load */
     
-    ..app-logo { 
-  width: 140px; 
-  height: 140px; /* Force height to match width for a perfect circle */
-  object-fit: cover; /* Ensures the image fills the circle without stretching */
-  border-radius: 50%; /* This is the magic property that makes it round */
-  background-color: transparent; /* Ensures no background color is added */
+   .app-logo { 
+  width: 35vw;             /* Takes up 35% of the screen's width on small devices */
+  max-width: 140px;        /* ...but stops growing once it hits 140px on larger screens */
+  aspect-ratio: 1 / 1;     /* MAGIC FIX: Automatically forces the height to perfectly match the width */
+  object-fit: cover;       
+  border-radius: 50%;      
+  background-color: transparent; 
   margin-bottom: 15px; 
 }
-
+    
 input, select { 
   padding: 12px; 
   margin: 10px 0 20px 0; 
