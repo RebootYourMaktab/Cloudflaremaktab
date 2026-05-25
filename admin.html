@@ -12,8 +12,23 @@
     h1, h2, h3, h4 { color: teal; font-family: 'GAGALIN', cursive; letter-spacing: 1px; font-weight: normal; margin-top: 0;}
     
     /* FIX: Screens are hidden by default to prevent side-by-side bug */
-    .screen { display: none; background-color: dimgray; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); text-align: center; width: 100%; max-width: 600px; }
-    #login-screen { display: block; max-width: 400px; } /* Login is explicitly visible on load */
+/* 1. Hide ALL screens by default */
+    .screen { 
+      display: none; 
+      background-color: white; 
+      padding: 20px; 
+      border-radius: 10px; 
+      box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); 
+      text-align: center; 
+      width: 100%; 
+      max-width: 600px; 
+    }
+    
+    /* 2. ONLY show the login screen when the page loads */
+    #login-screen { 
+      display: block; 
+      max-width: 400px; 
+    }    
     
    .app-logo { 
   width: 35vw;             /* Takes up 35% of the screen's width on small devices */
