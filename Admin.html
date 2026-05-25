@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Maktab Admin Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.cdnfonts.com/css/gagalin" rel="stylesheet">
+
+
+  <style>
+    body { background-color: blanchedalmond; color: teal; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    h1, h2, h3, h4 { color: teal; font-family: 'GAGALIN', cursive; letter-spacing: 1px; font-weight: normal; margin-top: 0;}
+    .screen { background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); text-align: center; width: 100%; max-width: 400px; }
+    #dashboard-screen, #task-screen { display: none; width: 100%; max-width: 600px; }
+   .app-logo { 
+      width: 140px; 
+      height: auto; 
+      margin-bottom: 15px; 
+      border-radius: 12px; 
+      box-shadow: 0 4px 8px rgba(128, 0, 0, 0.2); 
+    }
+    input { padding: 12px; margin: 10px 0 20px 0; border-radius: 5px; border: 1px solid teal; width: 85%; font-size: 1rem; color: teal; }
+    button { background-color: blanchedalmond; color: teal; border: 3px solid teal; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
+    button:active { background-color: teal; color: blanchedalmond; transform: scale(0.95); }
+    .login-btn { width: 90%; padding: 12px; }
+    .save-exit-btn { background-color: teal; color: blanchedalmond; padding: 10px 20px; font-size: 1.2rem; margin-top: 20px; }
+    
+    .exit-app-btn { background-color: teal; color: blanchedalmond;  padding: 10px 20px; font-size: 1.1rem; margin-top: 30px; }
+    
+    .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+    .category-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px 10px; height: 100%; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; background-color: white; }
+    th, td { padding: 10px 5px; border-bottom: 2px solid rgba(128,0,0,0.1); font-size: 0.9rem;}
+    th { font-family: 'Gagalin', sans-serif; color: teal; text-align: center; }
+    .status-toggle { cursor: pointer; }
+    .forest-tick { color: forestgreen; font-size: 1.5rem; }
+    .teal-tick { color: teal; font-size: 1.5rem; }
+    .gray-cloud { background-color: #f0f0f0; color: #777; font-size: 0.7rem; padding: 3px 6px; border-radius: 10px; }
+    .progress-container { width: 100%; background-color: rgba(128, 0, 0, 0.1); border-radius: 5px; height: 8px; margin-top: 8px; overflow: hidden; }
+    .progress-fill { background-color: limegreen; height: 100%; transition: width 0.3s ease; }
+    
+    #task-progress-wrapper { height: 12px; margin-bottom: 15px; }
+
+    /* NEW: Audio Button Styling */
+    .audio-btn { background-color: #3498db; color: white; border: 2px solid #2980b9; padding: 4px 8px; font-size: 0.7rem; border-radius: 5px; margin-top: 8px; margin-left: 0; display: inline-block; font-family: sans-serif; letter-spacing: 0; }
+    .audio-btn:active { background-color: #2980b9; transform: scale(0.95); }
+    .audio-playing { background-color: #e67e22; border-color: #d35400; } /* Turns Orange when playing */
+
+    .quote-box { 
+      margin-top: 30px; 
+      margin-bottom: 20px; 
+      font-size: 1rem; /* Fixed: Removed the dot before rem */
+      font-family: 'Comic Sans MS';
+      font-style: normal;
+      color: teal; /* Fixed: Changed from HTML inline style to proper CSS property */
+      line-height: 1.4; 
+      padding: 20px 10px 20px 10px; /* Fixed: Combined your padding rules (Top, Right, Bottom, Left) */
+      min-height: 40px;
+      border: 1px dashed teal; /* Added the missing semicolon at the end */
+      border-radius: 12px; 
+    }
+
+    @media (min-width: 600px) { .button-grid { grid-template-columns: repeat(4, 1fr); } }
+  </style>
+</head>
+<body>
+
+  <div id="login-screen" class="screen">
+    <img src="logo.png" alt="Maktab Logo" class="app-logo">
+    <h2>ADMIN PORTAL</h2>
+    <input type="password" id="adminPin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Enter 4-Digit PIN">
+    <button onclick="attemptAdminLogin()">Log In to Dashboard</button>
+    <br>
+    <div id="quote-box" class="quote-box" >......</div>
+    <p id="error-message" style="color: red; font-weight: bold;"></p>
+  </div>
+
+  <div id="admin-dashboard" class="screen">
+    <div id="welcome-message"></div>
+    <div class="button-grid" id="category-grid"></div>
+    <button class="exit-app-btn" onclick="location.reload()">Exit App</button>
+  </div>
+
+  <div id="task-screen" class="screen">
+    <h2 id="task-category-title">Tasks</h2>
+    
+    <div class="progress-container" id="task-progress-wrapper">
+      <div class="progress-fill" id="task-progress-fill" style="width: 0%;"></div>
+    </div>
+
+    <table>
+      <thead><tr><th>Task</th><th>Status</th><th>Teacher</th></tr></thead>
+      <tbody id="task-list-body"></tbody>
+    </table>
+    
+    <button class="save-exit-btn" onclick="saveAndExit()">Save and Return</button>
+  </div>
+
+  <script>
+    // --- CONFIGURE YOUR URL HERE ---
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTSI8edGh-riqutqrOci9d66hKos8a7kcB7VDw6FsUhZw91C4IvHOlKvR47Vr_DHqK/exec";
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get('token'); 
+
+    let currentStudentPin = "";
+    let currentCategory = "";
+    let pendingChanges = {};
+    
+    let currentTasksList = [];
+    let currentCategories = [];
+
+    // NEW: Audio Control Variables
+    let currentAudio = null;
+    let playingTaskId = null;
+
+function apiCall(payload) {
+  return fetch(SCRIPT_URL, {
+    method: 'POST',
+    redirect: 'follow', // Crucial: Apps Script redirects the request to a different Google server
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8' // MUST be text/plain to avoid CORS errors
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  });
+}
+// Fetch Quote in the background (No button locking, no waiting)
+    window.onload = function() {
+        apiCall({ action: 'getQuote' })
+        .then(data => {
+            if (data && data.success && data.quote) {
+                document.getElementById('quote-box').innerText = '"' + data.quote + '"';
+            } else {
+                document.getElementById('quote-box').innerText = '"SMessenger of Allah (ﷺ) said: "Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him""';
+            }
+        })
+        .catch(err => {
+            document.getElementById('quote-box').innerText = '"SMessenger of Allah (ﷺ) said: "Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him""'; 
+        });
+    };
+/**
+ * 7. Admin Login
+ */
+function verifyAdminLogin(token, pin) 
+{
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const adminSheet = ss.getSheetByName("Admins");
+  
+  if (!adminSheet) 
+  {
+    return { success: false, message: "Admins tab not found." };
+  }
+  
+  // Get all data from the Admins tab
+  const data = adminSheet.getDataRange().getValues();
+  
+  // Loop through the rows (starting at i=1 to skip the headers)
+  for (let i = 1; i < data.length; i++) 
+  {
+    const rowToken = String(data[i][0]).trim();
+    const rowPin = String(data[i][1]).trim();
+    const adminName = String(data[i][2]).trim(); 
+    
+    // Check if BOTH the Token and the PIN match perfectly
+    if (rowToken === String(token).trim() && rowPin === String(pin).trim()) 
+    {
+      return 
+      { 
+        success: true, 
+ // The new multi-line formatting for the welcome message
+          
+          document.getElementById('welcome-message').innerHTML = `
+            <h1>${data.adminData.adminName}</h1>
+            <h2 style="margin-bottom: 5px">* Ahlan wa sahlan *</h2>
+          
+          `;        
+    }
+  }
+  
+  // If the loop finishes and finds no match:
+  return { success: false, message: "Invalid Token or PIN." };
+}
+    
+     
+    }
+  </script>
+</body>
+</html>
