@@ -7,68 +7,40 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.cdnfonts.com/css/gagalin" rel="stylesheet">
 
-
-  <style>
+<style>
     body { background-color: blanchedalmond; color: teal; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     h1, h2, h3, h4 { color: teal; font-family: 'GAGALIN', cursive; letter-spacing: 1px; font-weight: normal; margin-top: 0;}
-    .screen { background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); text-align: center; width: 100%; max-width: 400px; }
-    #dashboard-screen, #task-screen { display: none; width: 100%; max-width: 600px; }
-   .app-logo { 
-      width: 140px; 
-      height: auto; 
-      margin-bottom: 15px; 
-      border-radius: 12px; 
-      box-shadow: 0 4px 8px rgba(128, 0, 0, 0.2); 
-    }
-    input { padding: 12px; margin: 10px 0 20px 0; border-radius: 5px; border: 1px solid teal; width: 85%; font-size: 1rem; color: teal; }
+    
+    /* FIX: Screens are hidden by default to prevent side-by-side bug */
+    .screen { display: none; background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); text-align: center; width: 100%; max-width: 600px; }
+    #login-screen { display: block; max-width: 400px; } /* Login is explicitly visible on load */
+    
+    .app-logo { width: 140px; height: auto; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 4px 8px rgba(128, 0, 0, 0.2); }
+    input, select { padding: 12px; margin: 10px 0 20px 0; border-radius: 5px; border: 1px solid teal; width: 85%; font-size: 1rem; color: teal; }
     button { background-color: blanchedalmond; color: teal; border: 3px solid teal; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
     button:active { background-color: teal; color: blanchedalmond; transform: scale(0.95); }
-    .login-btn { width: 90%; padding: 12px; }
-    .save-exit-btn { background-color: teal; color: blanchedalmond; padding: 10px 20px; font-size: 1.2rem; margin-top: 20px; }
     
-    .exit-app-btn { background-color: teal; color: blanchedalmond;  padding: 10px 20px; font-size: 1.1rem; margin-top: 30px; }
-    
-    .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
-    .category-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px 10px; height: 100%; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; background-color: white; }
-    th, td { padding: 10px 5px; border-bottom: 2px solid rgba(128,0,0,0.1); font-size: 0.9rem;}
-    th { font-family: 'Gagalin', sans-serif; color: teal; text-align: center; }
-    .status-toggle { cursor: pointer; }
-    .forest-tick { color: forestgreen; font-size: 1.5rem; }
-    .teal-tick { color: teal; font-size: 1.5rem; }
-    .gray-cloud { background-color: #f0f0f0; color: #777; font-size: 0.7rem; padding: 3px 6px; border-radius: 10px; }
-    .progress-container { width: 100%; background-color: rgba(128, 0, 0, 0.1); border-radius: 5px; height: 8px; margin-top: 8px; overflow: hidden; }
-    .progress-fill { background-color: limegreen; height: 100%; transition: width 0.4s ease; }
-    #task-progress-wrapper { height: 12px; margin-bottom: 15px; }
+    .quote-box { margin-top: 30px; margin-bottom: 20px; font-size: 1rem; font-family: 'Comic Sans MS'; color: teal; line-height: 1.4; padding: 20px 10px; min-height: 40px; border: 1px dashed teal; border-radius: 12px; }
 
-      /* Add these to your existing <style> block */
+    /* New Dashboard UI Elements */
     .dashboard-section { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(0,128,128, 0.2); }
-    .dashboard-section h3 { margin-bottom: 10px; border-bottom: 2px solid teal; padding-bottom: 5px; }
-    .stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.9rem; font-weight: bold; }
-    .progress-track { flex-grow: 1; background-color: #ddd; height: 10px; border-radius: 5px; margin: 0 10px; overflow: hidden; }
-    select { padding: 10px; margin-bottom: 15px; width: 100%; border: 2px solid teal; border-radius: 5px; font-family: sans-serif; font-size: 1rem; color: teal; outline: none; }
-    .sub-stat { font-size: 0.8rem; color: #555; padding-left: 10px; }
+    .list-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; text-align: left; }
+    .indicator { background: rgba(0,128,128,0.1); padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; font-family: sans-serif; color: teal;}
+    .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid teal; padding-bottom: 10px; }
+    .nav-title { font-size: 1.3rem; margin: 0; }
+    .back-btn { background-color: teal; color: blanchedalmond; font-size: 0.9rem; padding: 5px 10px; margin: 0; }
 
-    /* NEW: Audio Button Styling */
-    .audio-btn { background-color: #3498db; color: white; border: 2px solid #2980b9; padding: 4px 8px; font-size: 0.7rem; border-radius: 5px; margin-top: 8px; margin-left: 0; display: inline-block; font-family: sans-serif; letter-spacing: 0; }
-    .audio-btn:active { background-color: #2980b9; transform: scale(0.95); }
-    .audio-playing { background-color: #e67e22; border-color: #d35400; } /* Turns Orange when playing */
-
-    .quote-box { 
-      margin-top: 30px; 
-      margin-bottom: 20px; 
-      font-size: 1rem; /* Fixed: Removed the dot before rem */
-      font-family: 'Comic Sans MS';
-      font-style: normal;
-      color: teal; /* Fixed: Changed from HTML inline style to proper CSS property */
-      line-height: 1.4; 
-      padding: 20px 10px 20px 10px; /* Fixed: Combined your padding rules (Top, Right, Bottom, Left) */
-      min-height: 40px;
-      border: 1px dashed teal; /* Added the missing semicolon at the end */
-      border-radius: 12px; 
-    }
-
-    @media (min-width: 600px) { .button-grid { grid-template-columns: repeat(4, 1fr); } }
+    /* Toggle UI for Students/Tasks */
+    .action-row { border-bottom: 1px solid #eee; padding: 15px 0; text-align: left; display: flex; flex-direction: column; }
+    .action-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; color: teal; }
+    .toggle-container { display: flex; justify-content: space-around; background: #f9f9f9; padding: 10px; border-radius: 8px; }
+    .toggle-item { cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 45%; }
+    .tick-green { color: forestgreen; font-weight: bold; font-size: 1.5rem; }
+    .tick-gold { color: goldenrod; font-weight: bold; font-size: 1.5rem; }
+    .text-grey { color: grey; font-size: 0.8rem; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px;}
+    
+    #save-bar { position: sticky; bottom: 0; background: white; padding: 15px; border-top: 2px solid teal; margin-top: 20px; border-radius: 0 0 10px 10px;}
+    .save-btn { background-color: forestgreen; color: white; border-color: darkgreen; width: 100%; }
   </style>
 </head>
 <body>
@@ -78,232 +50,287 @@
     <h2>ADMIN PORTAL</h2>
     <input type="password" id="adminPin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Enter 4-Digit PIN">
     <button onclick="verifyAdminLogin()">Log In to Dashboard</button>
-    <br>
-    <div id="quote-box" class="quote-box" >......</div>
+    <div id="quote-box" class="quote-box">......</div>
     <p id="error-message" style="color: red; font-weight: bold;"></p>
   </div>
 
   <div id="admin-dashboard" class="screen">
     <div id="welcome-message"></div>
     
-    <div class="dashboard-section" id="class-section">
-      <h3>Overall Class Progress</h3>
-      <div id="class-stats-container">Loading...</div>
+    <div class="dashboard-section">
+      <h3>Class Progress</h3>
+      <button class="list-btn" onclick="openContext('class', null)" style="justify-content: center;">View Full Class</button>
     </div>
 
-    <div class="dashboard-section" id="group-section">
+    <div class="dashboard-section">
       <h3>Group Progress</h3>
-      <select id="group-selector" onchange="renderGroupStats()">
-        <option value="">Select a Group...</option>
-      </select>
-      <div id="group-stats-container"></div>
+      <select id="group-selector"><option value="">Select a Group...</option></select>
+      <button class="list-btn" onclick="openContext('group', document.getElementById('group-selector').value)" style="justify-content: center;">View Group</button>
     </div>
 
-    <div class="dashboard-section" id="student-section">
-      <h3>Student Progress</h3>
-      <select id="student-selector" onchange="renderStudentStats()">
-        <option value="">Select a Student...</option>
-      </select>
-      <div id="student-stats-container"></div>
+    <div class="dashboard-section">
+      <h3>Individual Progress</h3>
+      <select id="student-selector"><option value="">Select a Student...</option></select>
+      <button class="list-btn" onclick="openContext('student', document.getElementById('student-selector').value)" style="justify-content: center;">View Student</button>
     </div>
 
-    <button class="exit-app-btn" onclick="location.reload()">Exit Dashboard</button>
+    <button onclick="location.reload()" style="background: darkred; color: white; border-color: maroon; margin-top: 20px;">Exit Dashboard</button>
   </div>
 
-
+  <div id="categories-screen" class="screen"></div>
+  <div id="tasks-screen" class="screen"></div>
+  <div id="action-screen" class="screen"></div>
 
   <script>
-    // --- CONFIGURE YOUR URL HERE ---
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTSI8edGh-riqutqrOci9d66hKos8a7kcB7VDw6FsUhZw91C4IvHOlKvR47Vr_DHqK/exec";
-    
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get('token'); 
 
+    // Global State
     let adminPin = "";
-    
+    let allTasks = [];
+    let studentsMap = {};
+    let currentContext = { type: null, value: null }; // type: 'class', 'group', 'student'
+    let currentCategory = null;
+    let currentTask = null;
+    let pendingUpdates = {}; 
+
     function apiCall(payload) {
       return fetch(SCRIPT_URL, {
-        method: 'POST',
-        redirect: 'follow', 
-        headers: {
-          'Content-Type': 'text/plain;charset=utf-8' 
-        },
+        method: 'POST', redirect: 'follow', 
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
-      })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      });
+      }).then(r => r.json());
     }
 
-    // Fetch Quote in the background
+    // Initialization
     window.onload = function() {
-        apiCall({ action: 'getQuote' })
-        .then(data => {
-            if (data && data.success && data.quote) {
-                document.getElementById('quote-box').innerText = '"' + data.quote + '"';
-            } else {
-                document.getElementById('quote-box').innerText = '"Messenger of Allah (ﷺ) said: "Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him""';
-            }
-        })
-        .catch(err => {
-            document.getElementById('quote-box').innerText = '"Messenger of Allah (ﷺ) said: "Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him""'; 
-        });
+        apiCall({ action: 'getQuote' }).then(data => {
+            document.getElementById('quote-box').innerText = (data && data.success && data.quote) ? `"${data.quote}"` : '"Messenger of Allah (ﷺ) said: Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him"';
+        }).catch(() => {});
     };
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+      document.getElementById(screenId).style.display = 'block';
+    }
 
     function verifyAdminLogin() {
       const pin = document.getElementById('adminPin').value;
+      document.getElementById('error-message').innerText = "Loading data...";
       
-      // Clear previous errors
-      document.getElementById('error-message').innerText = "";
-
-      // FIX: Changed action to 'adminLogin'
-      apiCall({ action: 'adminLogin', pin: pin, token: urlToken })
-      .then(data => {
+      apiCall({ action: 'adminLogin', pin: pin, token: urlToken }).then(data => {
         if (data.success) {
           adminPin = pin;
-          
-          // FIX: Matched the HTML ID for the dashboard
-          document.getElementById('login-screen').style.display = 'none';
-          document.getElementById('admin-dashboard').style.display = 'block';
-          
-          document.getElementById('welcome-message').innerHTML = `
-            <h1>${data.adminData.name}</h1>
-            <h2 style="margin-bottom: 5px">* Ahlan wa sahlan *</h2>
-          `;
-          
-          // Next step: Load the Admin Dashboard Data
-          loadDashboardData();
-          
+          document.getElementById('welcome-message').innerHTML = `<h1>${data.adminData.name}</h1><h2 style="margin-bottom: 5px">* Ahlan wa sahlan *</h2>`;
+          fetchDashboardData();
         } else {
-           // Show error if login fails
            document.getElementById('error-message').innerText = data.message || "Invalid Token or PIN.";
         }
-      })
-      .catch(err => {
-         document.getElementById('error-message').innerText = "Connection error. Please try again.";
       });
     }
 
-    // Function to fetch the dashboard data (maktabProgress and students)
-    function loadDashboardData() {
-       apiCall({ action: 'getAdminDashboardData' })
-       .then(data => {
+    function fetchDashboardData() {
+       apiCall({ action: 'getAdminDashboardData' }).then(data => {
            if (data.success) {
-               console.log("Dashboard loaded successfully:", data);
-               // TODO: Render the data.students array and data.maktabProgress here
-               // Waiting for your explanation to build this part!
-           } else {
-               alert("Failed to load dashboard data: " + data.message);
-           }
-       });
-    }
-      // --- ADD THIS TO YOUR SCRIPT TAG ---
-    let globalDashboardData = null; // Store data globally to easily swap views
-
-    // Function to calculate percentage safely
-    function getCalcPercent(verified, total) {
-      return total === 0 ? 0 : Math.round((verified / total) * 100);
-    }
-
-    // Generate HTML for a progress bar row
-    function createProgressBarHTML(label, verified, total) {
-      const percent = getCalcPercent(verified, total);
-      return `
-        <div class="stat-row">
-          <span style="width: 30%;">${label}</span>
-          <div class="progress-track">
-            <div class="progress-fill" style="width: ${percent}%"></div>
-          </div>
-          <span style="width: 15%; text-align: right;">${percent}%</span>
-        </div>
-      `;
-    }
-
-    function loadDashboardData() {
-       apiCall({ action: 'getAdminDashboardData' })
-       .then(data => {
-           if (data.success) {
-               globalDashboardData = data;
+               allTasks = data.tasks;
                
-               // 1. Render Class Data
-               const classData = data.classStats;
-               document.getElementById('class-stats-container').innerHTML = 
-                 createProgressBarHTML("Total Verification", classData.verified, classData.total);
+               // Populate Dropdowns
+               const grpSelect = document.getElementById('group-selector');
+               data.groups.forEach(g => grpSelect.innerHTML += `<option value="${g}">Group ${g}</option>`);
+               
+               const stuSelect = document.getElementById('student-selector');
+               data.students.forEach(s => {
+                 studentsMap[s.pin] = s.name;
+                 stuSelect.innerHTML += `<option value="${s.pin}">${s.name} (Grp ${s.group})</option>`;
+               });
 
-               // 2. Populate Dropdowns
-               populateDropdowns();
-
+               showScreen('admin-dashboard');
            } else {
-               alert("Failed to load dashboard data: " + data.message);
+               document.getElementById('error-message').innerText = "Data failed to load.";
            }
        });
     }
 
-    function populateDropdowns() {
-      const groupSelect = document.getElementById('group-selector');
-      const studentSelect = document.getElementById('student-selector');
-      
-      // Populate Groups
-      Object.keys(globalDashboardData.groupStats).sort().forEach(group => {
-        const opt = document.createElement('option');
-        opt.value = group;
-        opt.innerText = `Group ${group}`;
-        groupSelect.appendChild(opt);
-      });
-
-      // Populate Students (Alphabetically)
-      const students = Object.values(globalDashboardData.students).sort((a, b) => a.name.localeCompare(b.name));
-      students.forEach(student => {
-        const opt = document.createElement('option');
-        opt.value = student.pin;
-        opt.innerText = `${student.name} (Grp ${student.group})`;
-        studentSelect.appendChild(opt);
-      });
+    // --- MATH & FILTERING CORE ---
+    function getFilteredTasks() {
+      if (currentContext.type === 'group') return allTasks.filter(t => t.group === currentContext.value);
+      if (currentContext.type === 'student') return allTasks.filter(t => t.pin === currentContext.value);
+      return allTasks; // Class
     }
 
-    function renderGroupStats() {
-      const group = document.getElementById('group-selector').value;
-      const container = document.getElementById('group-stats-container');
-      
-      if (!group) { container.innerHTML = ""; return; }
-
-      const gData = globalDashboardData.groupStats[group];
-      let html = createProgressBarHTML("Overall Group", gData.verified, gData.total);
-      
-      html += `<div style="margin-top:10px; color:teal; font-family: 'Gagalin';">By Category</div>`;
-      for (const [catName, stats] of Object.entries(gData.categories)) {
-        html += createProgressBarHTML(catName, stats.verified, stats.total);
-      }
-
-      // If you want Tasks too, uncomment below (it can get long!)
-      /*
-      html += `<div style="margin-top:10px; color:teal; font-family: 'Gagalin';">By Task</div>`;
-      for (const [taskName, stats] of Object.entries(gData.tasks)) {
-        html += `<div class="sub-stat">${createProgressBarHTML(taskName, stats.verified, stats.total)}</div>`;
-      }
-      */
-      
-      container.innerHTML = html;
+    function calcVerification(tasksArray) {
+      if (tasksArray.length === 0) return 0;
+      const verified = tasksArray.filter(t => t.verification === 'Verified').length;
+      return Math.round((verified / tasksArray.length) * 100);
     }
 
-    function renderStudentStats() {
-      const pin = document.getElementById('student-selector').value;
-      const container = document.getElementById('student-stats-container');
-      
-      if (!pin) { container.innerHTML = ""; return; }
+    // --- NAVIGATION FLOW ---
+    function openContext(type, value) {
+      if ((type === 'group' || type === 'student') && !value) return alert("Please select an option.");
+      currentContext = { type, value };
+      renderCategoriesScreen();
+    }
 
-      const sData = globalDashboardData.students[pin];
-      let html = createProgressBarHTML("Overall Progress", sData.verified, sData.total);
+    function renderCategoriesScreen() {
+      const targetTasks = getFilteredTasks();
+      const categories = [...new Set(targetTasks.map(t => t.category))];
       
-      html += `<div style="margin-top:10px; color:teal; font-family: 'Gagalin';">By Category</div>`;
-      for (const [catName, stats] of Object.entries(sData.categories)) {
-        html += createProgressBarHTML(catName, stats.verified, stats.total);
+      let title = currentContext.type === 'class' ? "Class Categories" : 
+                  currentContext.type === 'group' ? `Group ${currentContext.value} Categories` :
+                  `${studentsMap[currentContext.value]}'s Categories`;
+
+      let html = `<div class="nav-header">
+                    <h2 class="nav-title">${title}</h2>
+                    <button class="back-btn" onclick="showScreen('admin-dashboard')">Back</button>
+                  </div>`;
+
+      categories.forEach(cat => {
+        const catTasks = targetTasks.filter(t => t.category === cat);
+        const percent = calcVerification(catTasks);
+        html += `<button class="list-btn" onclick="openCategory('${cat}')">
+                   ${cat} <span class="indicator">${percent}% Verified</span>
+                 </button>`;
+      });
+
+      document.getElementById('categories-screen').innerHTML = html;
+      showScreen('categories-screen');
+    }
+
+    function openCategory(category) {
+      currentCategory = category;
+      // If we are looking at a specific student, skip the Task list and go straight to their actions
+      if (currentContext.type === 'student') {
+        renderActionScreen();
+      } else {
+        renderTasksScreen();
       }
+    }
+
+    function renderTasksScreen() {
+      const targetTasks = getFilteredTasks().filter(t => t.category === currentCategory);
+      const tasks = [...new Set(targetTasks.map(t => t.task))];
       
-      container.innerHTML = html;
+      let html = `<div class="nav-header">
+                    <h2 class="nav-title">${currentCategory}</h2>
+                    <button class="back-btn" onclick="showScreen('categories-screen')">Back</button>
+                  </div>`;
+
+      tasks.forEach(task => {
+        const specificTasks = targetTasks.filter(t => t.task === task);
+        const percent = calcVerification(specificTasks);
+        html += `<button class="list-btn" onclick="openTask('${task}')">
+                   ${task} <span class="indicator">${percent}% Verified</span>
+                 </button>`;
+      });
+
+      document.getElementById('tasks-screen').innerHTML = html;
+      showScreen('tasks-screen');
+    }
+
+    function openTask(task) {
+      currentTask = task;
+      renderActionScreen();
+    }
+
+    // --- ACTION LIST RENDERING ---
+    function renderActionScreen() {
+      let activeTasks = [];
+      let title = "";
+      let backTarget = "";
+
+      if (currentContext.type === 'student') {
+        // Individual path: Show all tasks for the selected category
+        activeTasks = getFilteredTasks().filter(t => t.category === currentCategory);
+        title = `${studentsMap[currentContext.value]}: ${currentCategory}`;
+        backTarget = "showScreen('categories-screen')";
+      } else {
+        // Class/Group path: Show all students for the selected task
+        activeTasks = getFilteredTasks().filter(t => t.category === currentCategory && t.task === currentTask);
+        title = `Task: ${currentTask}`;
+        backTarget = "showScreen('tasks-screen')";
+      }
+
+      let html = `<div class="nav-header">
+                    <h2 class="nav-title">${title}</h2>
+                    <button class="back-btn" onclick="${backTarget}">Back</button>
+                  </div>`;
+
+      activeTasks.forEach(t => {
+        // Overlay any pending changes that haven't been saved to DB yet
+        const displayStatus = pendingUpdates[t.rowId]?.status || t.status;
+        const displayVerif = pendingUpdates[t.rowId]?.verification || t.verification;
+        
+        const labelText = currentContext.type === 'student' ? t.task : t.name;
+
+        html += `
+          <div class="action-row">
+            <div class="action-title">${labelText}</div>
+            <div class="toggle-container">
+              <div class="toggle-item" onclick="toggleLocalStatus(${t.rowId})">
+                ${displayStatus === 'Completed' ? '<span class="tick-green">✔</span>' : '<span class="text-grey">To be completed</span>'}
+              </div>
+              <div class="toggle-item" onclick="toggleLocalVerif(${t.rowId})">
+                ${displayVerif === 'Verified' ? '<span class="tick-gold">✔</span>' : '<span class="text-grey">To be verified</span>'}
+              </div>
+            </div>
+          </div>`;
+      });
+
+      if (Object.keys(pendingUpdates).length > 0) {
+         html += `<div id="save-bar"><button class="save-btn" onclick="saveBatchUpdates()">Save Changes</button></div>`;
+      }
+
+      document.getElementById('action-screen').innerHTML = html;
+      showScreen('action-screen');
+    }
+
+    // --- TOGGLE LOGIC ---
+    function toggleLocalStatus(rowId) {
+      const originalTask = allTasks.find(t => t.rowId === rowId);
+      if (!pendingUpdates[rowId]) pendingUpdates[rowId] = { status: originalTask.status, verification: originalTask.verification, rowId: rowId };
+      
+      pendingUpdates[rowId].status = pendingUpdates[rowId].status === 'Completed' ? 'To be completed' : 'Completed';
+      renderActionScreen();
+    }
+
+    function toggleLocalVerif(rowId) {
+      const originalTask = allTasks.find(t => t.rowId === rowId);
+      if (!pendingUpdates[rowId]) pendingUpdates[rowId] = { status: originalTask.status, verification: originalTask.verification, rowId: rowId };
+      
+      pendingUpdates[rowId].verification = pendingUpdates[rowId].verification === 'Verified' ? 'Unverified' : 'Verified';
+      
+      // Auto-complete status if they mark it verified
+      if (pendingUpdates[rowId].verification === 'Verified') pendingUpdates[rowId].status = 'Completed';
+      
+      renderActionScreen();
+    }
+
+    // --- SAVE LOGIC ---
+    function saveBatchUpdates() {
+      const changesArr = Object.values(pendingUpdates);
+      if (changesArr.length === 0) return;
+
+      document.querySelector('.save-btn').innerText = "Saving...";
+      
+      apiCall({ action: 'adminUpdateTasks', changes: changesArr }).then(res => {
+         if (res.success) {
+            // Apply changes locally to avoid needing to refresh all data
+            changesArr.forEach(c => {
+               const taskIndex = allTasks.findIndex(t => t.rowId === c.rowId);
+               if (taskIndex > -1) {
+                  allTasks[taskIndex].status = c.status;
+                  allTasks[taskIndex].verification = c.verification;
+               }
+            });
+            pendingUpdates = {}; // Clear queue
+            renderActionScreen(); // Re-render without the save bar
+            alert("Changes saved successfully!");
+         } else {
+            alert("Save failed. Please try again.");
+            document.querySelector('.save-btn').innerText = "Save Changes";
+         }
+      });
     }
   </script>
 </body>
