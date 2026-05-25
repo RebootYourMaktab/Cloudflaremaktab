@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  
+    <title>Maktab Admin Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.cdnfonts.com/css/gagalin" rel="stylesheet">
-<title>Maktab Admin Portal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 
   <style>
     body { background-color: blanchedalmond; color: teal; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -91,7 +91,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get('token'); 
 
-    let currentStudentPin = "";
+    let adminPin = "";
     let currentCategory = "";
     let pendingChanges = {};
     
@@ -132,51 +132,27 @@ function apiCall(payload) {
             document.getElementById('quote-box').innerText = '"SMessenger of Allah (ﷺ) said: "Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him""'; 
         });
     };
-/**
- * 7. Admin Login
- */
-function verifyAdminLogin(token, pin) 
-{
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const adminSheet = ss.getSheetByName("Admins");
-  
-  if (!adminSheet) 
-  {
-    return { success: false, message: "Admins tab not found." };
-  }
-  
-  // Get all data from the Admins tab
-  const data = adminSheet.getDataRange().getValues();
-  
-  // Loop through the rows (starting at i=1 to skip the headers)
-  for (let i = 1; i < data.length; i++) 
-  {
-    const rowToken = String(data[i][0]).trim();
-    const rowPin = String(data[i][1]).trim();
-    const adminName = String(data[i][2]).trim(); 
-    
-    // Check if BOTH the Token and the PIN match perfectly
-    if (rowToken === String(token).trim() && rowPin === String(pin).trim()) 
-    {
-      return 
-      { 
-        success: true, 
- // The new multi-line formatting for the welcome message
+function verifyAdminLogin() {
+      const pin = document.getElementById('adminPin').value;
+
+       apiCall({ action: 'login', pin: pin, token: urlToken })
+      .then(data => {
+        if (data.success) {
+          currentadminPin = pin;
+        
+          
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('dashboard-screen').style.display = 'block';
+          
+          // The new multi-line formatting for the welcome message
           
           document.getElementById('welcome-message').innerHTML = `
-            <h1>${data.adminData.adminName}</h1>
+            <h1>${data.adminData.name}</h1>
             <h2 style="margin-bottom: 5px">* Ahlan wa sahlan *</h2>
-          
-          `;        
-    }
-  }
-  
-  // If the loop finishes and finds no match:
-  return { success: false, message: "Invalid Token or PIN." };
-}
-    
+        
+          `;
      
-    }
+   
   </script>
 </body>
 </html>
