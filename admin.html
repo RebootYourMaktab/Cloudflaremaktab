@@ -177,7 +177,7 @@ input, select {
                  studentsByGroup[group].sort((a, b) => a.name.localeCompare(b.name)).forEach(s => {
                    let opt = document.createElement('option');
                    opt.value = s.pin;
-                   opt.innerText = s.name;
+                   opt.innerText =  s.name ;
                    optgroup.appendChild(opt);
                  });
                  stuSelect.appendChild(optgroup);
@@ -320,8 +320,9 @@ input, select {
                   </div>`;
             }
         }
-
-        const labelText = currentContext.type === 'student' ? t.task : t.name;
+const labelText = currentContext.type === 'student' 
+  ? t.task 
+  : `<span style="color: grey; font-weight: normal; font-size: 1rem;">${t.name}</span>`;
 
         html += `
           <div class="action-row">
