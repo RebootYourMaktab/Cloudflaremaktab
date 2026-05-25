@@ -92,67 +92,86 @@
     const urlToken = urlParams.get('token'); 
 
     let adminPin = "";
-    let currentCategory = "";
-    let pendingChanges = {};
     
-    let currentTasksList = [];
-    let currentCategories = [];
-
-    // NEW: Audio Control Variables
-    let currentAudio = null;
-    let playingTaskId = null;
-
-function apiCall(payload) {
-  return fetch(SCRIPT_URL, {
-    method: 'POST',
-    redirect: 'follow', // Crucial: Apps Script redirects the request to a different Google server
-    headers: {
-      'Content-Type': 'text/plain;charset=utf-8' // MUST be text/plain to avoid CORS errors
-    },
-    body: JSON.stringify(payload)
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+    function apiCall(payload) {
+      return fetch(SCRIPT_URL, {
+        method: 'POST',
+        redirect: 'follow', 
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8' 
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      });
     }
-    return response.json();
-  });
-}
-// Fetch Quote in the background (No button locking, no waiting)
+
+    // Fetch Quote in the background
     window.onload = function() {
         apiCall({ action: 'getQuote' })
         .then(data => {
             if (data && data.success && data.quote) {
                 document.getElementById('quote-box').innerText = '"' + data.quote + '"';
             } else {
-                document.getElementById('quote-box').innerText = '"SMessenger of Allah (ﷺ) said: "Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him""';
+                document.getElementById('quote-box').innerText = '"Messenger of Allah (ﷺ) said: "Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him""';
             }
         })
         .catch(err => {
-            document.getElementById('quote-box').innerText = '"SMessenger of Allah (ﷺ) said: "Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him""'; 
+            document.getElementById('quote-box').innerText = '"Messenger of Allah (ﷺ) said: "Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him""'; 
         });
     };
-function verifyAdminLogin() {
-      const pin = document.getElementById('adminPin').value;
 
-       apiCall({ action: 'login', pin: pin, token: urlToken })
+    function verifyAdminLogin() {
+      const pin = document.getElementById('adminPin').value;
+      
+      // Clear previous errors
+      document.getElementById('error-message').innerText = "";
+
+      // FIX: Changed action to 'adminLogin'
+      apiCall({ action: 'adminLogin', pin: pin, token: urlToken })
       .then(data => {
         if (data.success) {
-          currentadminPin = pin;
-        
+          adminPin = pin;
           
+          // FIX: Matched the HTML ID for the dashboard
           document.getElementById('login-screen').style.display = 'none';
-          document.getElementById('dashboard-screen').style.display = 'block';
-          
-          // The new multi-line formatting for the welcome message
+          document.getElementById('admin-dashboard').style.display = 'block';
           
           document.getElementById('welcome-message').innerHTML = `
             <h1>${data.adminData.name}</h1>
             <h2 style="margin-bottom: 5px">* Ahlan wa sahlan *</h2>
-        
           `;
-     
-   
+          
+          // Next step: Load the Admin Dashboard Data
+          loadDashboardData();
+          
+        } else {
+           // Show error if login fails
+           document.getElementById('error-message').innerText = data.message || "Invalid Token or PIN.";
+        }
+      })
+      .catch(err => {
+         document.getElementById('error-message').innerText = "Connection error. Please try again.";
+      });
+    }
+
+    // Function to fetch the dashboard data (maktabProgress and students)
+    function loadDashboardData() {
+       apiCall({ action: 'getAdminDashboardData' })
+       .then(data => {
+           if (data.success) {
+               console.log("Dashboard loaded successfully:", data);
+               // TODO: Render the data.students array and data.maktabProgress here
+               // Waiting for your explanation to build this part!
+           } else {
+               alert("Failed to load dashboard data: " + data.message);
+           }
+       });
+    }
   </script>
 </body>
 </html>
