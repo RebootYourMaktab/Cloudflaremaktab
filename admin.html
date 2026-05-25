@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Maktab Admin Portal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.cdnfonts.com/css/gagalin" rel="stylesheet">
-
+<title>Maktab Admin Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <style>
     body { background-color: blanchedalmond; color: teal; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -70,7 +70,7 @@
     <img src="logo.png" alt="Maktab Logo" class="app-logo">
     <h2>ADMIN PORTAL</h2>
     <input type="password" id="adminPin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Enter 4-Digit PIN">
-    <button onclick="attemptAdminLogin()">Log In to Dashboard</button>
+    <button onclick="verifyAdminLogin()">Log In to Dashboard</button>
     <br>
     <div id="quote-box" class="quote-box" >......</div>
     <p id="error-message" style="color: red; font-weight: bold;"></p>
