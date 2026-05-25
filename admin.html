@@ -13,14 +13,28 @@
     
     /* FIX: Screens are hidden by default to prevent side-by-side bug */
 /* 1. Hide ALL screens by default */
-    .view {
-            display: none; /* Hides all screens by default */
-            }
-
-    .view.active {
-            display: block; /* Shows only the active screen */
-            }
-
+    /* 1. Hide ALL screens by default */
+    .screen { 
+      display: none; 
+      background-color: white; 
+      padding: 20px; 
+      border-radius: 10px; 
+      box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); 
+      text-align: center; 
+      width: 100%; 
+      max-width: 600px; 
+    }
+    
+    .screen { 
+      display: none; 
+      background-color: silver; 
+      padding: 20px; 
+      border-radius: 10px; 
+      box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); 
+      text-align: center; 
+      width: 100%; 
+      max-width: 600px; 
+    }
     
     /* 2. ONLY show the login screen when the page loads */
     #login-screen { 
@@ -84,7 +98,7 @@ input, select {
     <p id="error-message" style="color: red; font-weight: bold;"></p>
   </div>
 
-  <<div id="main-menu-screen" class="screen">
+  <<div id="main-menu-screen" class="screen" class="view">
     <div id="welcome-message"></div>
     <h2>Admin Dashboard</h2>
     <div class="button-grid" style="grid-template-columns: 1fr; gap: 15px;">
