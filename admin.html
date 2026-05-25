@@ -13,16 +13,14 @@
     
     /* FIX: Screens are hidden by default to prevent side-by-side bug */
 /* 1. Hide ALL screens by default */
-    .screen { 
-      display: none; 
-      background-color: white; 
-      padding: 20px; 
-      border-radius: 10px; 
-      box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); 
-      text-align: center; 
-      width: 100%; 
-      max-width: 600px; 
-    }
+    .view {
+            display: none; /* Hides all screens by default */
+            }
+
+    .view.active {
+            display: block; /* Shows only the active screen */
+            }
+
     
     /* 2. ONLY show the login screen when the page loads */
     #login-screen { 
@@ -77,12 +75,12 @@ input, select {
 </head>
 <body>
 
-  <div id="login-screen" class="screen">
+  <div id="login-screen" class="view active">
     <img src="logo.png" alt="Maktab Logo" class="app-logo">
     <h2>ADMIN PORTAL</h2>
     <input type="password" id="adminPin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Enter 4-Digit PIN">
     <button onclick="verifyAdminLogin()">Log In to Dashboard</button>
-    <div id="quote-box" class="quote-box">......</div>
+    <div id="quote-box" class="quote-box" class="view active"> >......</div>
     <p id="error-message" style="color: red; font-weight: bold;"></p>
   </div>
 
