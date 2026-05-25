@@ -34,7 +34,7 @@ input, select {
   font-size: 1rem; 
   color: teal; 
 }
-    button { background-color: WhiteSmoke; color: teal; border: 3px solid teal; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
+    button { background-color: teal; color: WhiteSmoke; border: 3px solid teal; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
     button:active { background-color: teal; color: WhiteSmoke; transform: scale(0.95); }
 
     .quote-box { margin-top: 30px; margin-bottom: 20px; font-size: 1rem; font-weight: normal; color: WhiteSmoke; line-height: 1.4; padding: 20px 10px; min-height: 40px; border: 1px dashed teal; border-radius: 12px; }
@@ -52,7 +52,7 @@ input, select {
     .action-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; color: teal; }
     .toggle-container { display: flex; justify-content: space-around; background: WhiteSmoke; padding: 10px; border-radius: 8px; }
     .toggle-item { cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 45%; }
-    .tick-green { color: forestgreen; font-weight: bold; font-size: 1.5rem; }
+    .tick-green { color: teal; font-weight: bold; font-size: 1.5rem; }
     .tick-gold { color: goldenrod; font-weight: bold; font-size: 1.5rem; }
     .text-grey { color: grey; font-size: 0.8rem; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px;}
     
@@ -329,10 +329,12 @@ const labelText = currentContext.type === 'student'
             <div class="action-title">${labelText}</div>
             <div class="toggle-container">
               <div class="toggle-item" onclick="toggleLocalStatus(${t.rowId})">
-                ${displayStatus === 'Completed' ? '<span class="tick-green">✔</span>' : '<span class="text-grey">To be completed</span>'}
+
+    
+                ${displayStatus === 'Completed' ? '<span class="tick-green">✓</span>' : '<span class="text-grey">To be completed</span>'}
               </div>
               <div class="toggle-item" onclick="toggleLocalVerif(${t.rowId})">
-                ${displayVerif === 'Verified' ? '<span class="tick-gold">✔</span>' : '<span class="text-grey">To be verified</span>'}
+                ${displayVerif === 'Verified' ? '<span class="tick-gold">✓</span>' : '<span class="text-grey">To be verified</span>'}
               </div>
             </div>
           </div>`;
