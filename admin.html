@@ -17,7 +17,7 @@
     
     .view.active { 
       display: block !important; 
-      background-color: silver; 
+      background-color: rgb(52, 45, 45); 
       padding: 20px; 
       border-radius: 10px; 
       box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); 
@@ -35,9 +35,9 @@
     button { background-color: teal; color: WhiteSmoke; border: 3px solid teal; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
     button:active { background-color: teal; color: WhiteSmoke; transform: scale(0.95); }
 
-    .quote-box { margin-top: 30px; margin-bottom: 20px; font-size: 1rem; font-weight: normal; color: WhiteSmoke; line-height: 1.4; padding: 20px 10px; min-height: 40px; border: 1px dashed teal; border-radius: 12px; }
+    .quote-box { margin-top: 30px; margin-bottom: 20px; font-size: 1rem; font-weight: normal; color: teal; line-height: 1.4; padding: 20px 10px; min-height: 40px; border: 1px dashed teal; border-radius: 12px; }
 
-    .dashboard-section { background-color: grey; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(0,128,128, 0.2); }
+    .dashboard-section { background-color: #E5E4E2; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(0,128,128, 0.2); }
     .list-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; text-align: left; }
     .indicator { background: rgba(0,128,128,0.1); padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; font-family: sans-serif; color: teal;}
     .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid teal; padding-bottom: 10px; }
@@ -76,7 +76,7 @@
       <button class="list-btn" onclick="showScreen('attendance-dashboard')" style="background: #006666; color: Whitesmoke; border-color: #006666; justify-content: center; padding: 15px;">Manage Attendance</button>
       <button class="list-btn" onclick="alert('Student Records coming soon!')" style="background: #008080; color: Whitesmoke; border-color: #008080; justify-content: center; padding: 15px; background: #eee; color: #999; border-color: #ccc;"> Student Records</button>
     </div>
-    <button onclick="location.reload()" style="background: iridium; color: Whitesmoke; border-color: iridium; margin-top: 30px; width: 100%;">Log Out</button>
+    <button onclick="location.reload()" style="background: #818589; color: Whitesmoke; border-color: #818589; margin-top: 30px; width: 100%;">Log Out</button>
   </div>
 
   <div id="progress-dashboard" class="view">
@@ -164,7 +164,7 @@
       apiCall({ action: 'adminLogin', pin: pin, token: urlToken }).then(data => {
         if (data.success) {
           adminPin = pin;
-          document.getElementById('welcome-message').innerHTML = `<h1>Muallimah<br>${data.adminData.name}</h1><h2 style="margin-bottom: 5px">** Ahlan wa sahlan **</h2>`;
+          document.getElementById('welcome-message').innerHTML = `<h1>Muallimah<br>${data.adminData.name}`;
           fetchDashboardData();
         } else {
            document.getElementById('error-message').innerText = data.message || "Invalid Token or PIN.";
