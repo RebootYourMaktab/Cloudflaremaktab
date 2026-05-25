@@ -8,11 +8,11 @@
   <link href="https://fonts.cdnfonts.com/css/gagalin" rel="stylesheet">
 
 <style>
-    body { background-color: WhiteSmoke; color: teal; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { background-color: silver; color: teal; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     h1, h2, h3, h4 { color: teal; font-family: 'GAGALIN', cursive; letter-spacing: 1px; font-weight: normal; margin-top: 0;}
     
     /* FIX: Screens are hidden by default to prevent side-by-side bug */
-    .screen { display: none; background-color: #424242; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); text-align: center; width: 100%; max-width: 600px; }
+    .screen { display: none; background-color: dimgray; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); text-align: center; width: 100%; max-width: 600px; }
     #login-screen { display: block; max-width: 400px; } /* Login is explicitly visible on load */
     
    .app-logo { 
@@ -71,8 +71,54 @@ input, select {
     <p id="error-message" style="color: red; font-weight: bold;"></p>
   </div>
 
-  <div id="admin-dashboard" class="screen">
+  <<div id="main-menu-screen" class="screen">
     <div id="welcome-message"></div>
+    <h2>Admin Dashboard</h2>
+    <div class="button-grid" style="grid-template-columns: 1fr; gap: 15px;">
+      <button class="list-btn" onclick="showScreen('progress-dashboard')" style="justify-content: center; padding: 15px;">📊 Manage Progress</button>
+      <button class="list-btn" onclick="openAttendanceDashboard()" style="justify-content: center; padding: 15px;">📋 Manage Attendance</button>
+      <button class="list-btn" onclick="alert('Student Records coming soon!')" style="justify-content: center; padding: 15px; background: #eee; color: #999; border-color: #ccc;">📁 Student Records</button>
+    </div>
+    <button onclick="location.reload()" style="background: darkred; color: white; border-color: maroon; margin-top: 30px; width: 100%;">Log Out</button>
+  </div>
+
+  <div id="progress-dashboard" class="screen">
+    <div class="nav-header">
+      <h2 class="nav-title">Progress</h2>
+      <button class="back-btn" onclick="showScreen('main-menu-screen')">Back</button>
+    </div>
+    <div class="dashboard-section">
+      <h3>Class Progress</h3>
+      <button class="list-btn" onclick="openContext('class', null)" style="justify-content: center;">View Full Class</button>
+    </div>
+    <div class="dashboard-section">
+      <h3>Group Progress</h3>
+      <select id="group-selector"><option value="">Select a Group...</option></select>
+      <button class="list-btn" onclick="openContext('group', document.getElementById('group-selector').value)" style="justify-content: center;">View Group</button>
+    </div>
+    <div class="dashboard-section">
+      <h3>Individual Progress</h3>
+      <select id="student-selector"><option value="">Select a Student...</option></select>
+      <button class="list-btn" onclick="openContext('student', document.getElementById('student-selector').value)" style="justify-content: center;">View Student</button>
+    </div>
+  </div>
+
+  <div id="attendance-dashboard" class="screen">
+    <div class="nav-header">
+      <h2 class="nav-title">Attendance</h2>
+      <button class="back-btn" onclick="showScreen('main-menu-screen')">Back</button>
+    </div>
+    <div class="button-grid" style="grid-template-columns: 1fr; gap: 10px;">
+      <button class="list-btn" onclick="openMarkRegister()" style="justify-content: center;">📝 Mark Register</button>
+      <button class="list-btn" onclick="openViewAttendance()" style="justify-content: center;">🔍 View Records</button>
+      <button class="list-btn" onclick="openAttendanceStats()" style="justify-content: center;">📈 Attendance Stats</button>
+    </div>
+  </div>
+
+  <div id="categories-screen" class="screen"></div>
+  <div id="tasks-screen" class="screen"></div>
+  <div id="action-screen" class="screen"></div>
+  <div id="attendance-action-screen" class="screen"></div>
     
     <div class="dashboard-section">
       <h3>Class Progress</h3>
@@ -99,12 +145,25 @@ input, select {
   <div id="action-screen" class="screen"></div>
 
   <script>
+    
+    // Helper: Get first and last day of current month in YYYY-MM-DD
+    function getDefaultDateRange() {
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      return {
+        start: firstDay.toISOString().split('T')[0],
+        end: now.toISOString().split('T')[0]
+      };
+    }
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTSI8edGh-riqutqrOci9d66hKos8a7kcB7VDw6FsUhZw91C4IvHOlKvR47Vr_DHqK/exec";
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get('token'); 
 
     // Global State
     let adminPin = "";
+        let allAttendance = []; // Store fetched attendance records
+let allStudents = [];
+    let attendanceState = {}; // Keeps track of who is present/absent
     let allTasks = [];
     let studentsMap = {};
     let currentContext = { type: null, value: null }; // type: 'class', 'group', 'student'
@@ -151,44 +210,47 @@ input, select {
        apiCall({ action: 'getAdminDashboardData' }).then(data => {
            if (data.success) {
                allTasks = data.tasks;
+               allStudents = data.students; 
                
-               // Populate Group Dropdown
+               // Populate Dropdowns (same as your current code)
                const grpSelect = document.getElementById('group-selector');
                grpSelect.innerHTML = '<option value="">Select a Group...</option>';
                data.groups.forEach(g => grpSelect.innerHTML += `<option value="${g}">Group ${g}</option>`);
                
-               // Populate Student Dropdown (Grouped and Alphabetical)
                const stuSelect = document.getElementById('student-selector');
                stuSelect.innerHTML = '<option value="">Select a Student...</option>';
-               
                const studentsByGroup = {};
                data.students.forEach(s => {
                  studentsMap[s.pin] = s.name;
                  if (!studentsByGroup[s.group]) studentsByGroup[s.group] = [];
                  studentsByGroup[s.group].push(s);
                });
-
-               // Sort groups numerically/alphabetically
                Object.keys(studentsByGroup).sort().forEach(group => {
                  let optgroup = document.createElement('optgroup');
                  optgroup.label = `Group ${group}`;
-                 
-                 // Sort students alphabetically within the group
                  studentsByGroup[group].sort((a, b) => a.name.localeCompare(b.name)).forEach(s => {
                    let opt = document.createElement('option');
                    opt.value = s.pin;
-                   opt.innerText =  s.name ;
+                   opt.innerText = s.name;
                    optgroup.appendChild(opt);
                  });
                  stuSelect.appendChild(optgroup);
                });
 
-               showScreen('admin-dashboard');
+               // Show Main Menu instead of Progress directly
+               showScreen('main-menu-screen');
+               
+               // Silently fetch attendance data in background so it's ready
+               apiCall({ action: 'getAttendanceData' }).then(attData => {
+                 if(attData.success) allAttendance = attData.records;
+               });
+
            } else {
                document.getElementById('error-message').innerText = "Data failed to load.";
            }
        });
     }
+
     // --- MATH & FILTERING CORE ---
     function getFilteredTasks() {
       if (currentContext.type === 'group') return allTasks.filter(t => t.group === currentContext.value);
@@ -395,6 +457,101 @@ const labelText = currentContext.type === 'student'
             alert("Save failed. Please try again.");
             document.querySelector('.save-btn').innerText = "Save Changes";
          }
+      });
+    }
+    // ==========================================
+    // ATTENDANCE FUNCTIONS
+    // ==========================================
+
+    function openAttendance() {
+      // Default everyone to 'Present' when opening the screen
+      attendanceState = {};
+      allStudents.forEach(s => {
+         attendanceState[s.pin] = 'Present';
+      });
+      renderAttendanceScreen();
+    }
+
+    function renderAttendanceScreen() {
+      // Get today's date in YYYY-MM-DD format for the date picker
+      const today = new Date().toISOString().split('T')[0];
+      
+      let html = `<div class="nav-header">
+                    <h2 class="nav-title">Attendance</h2>
+                    <button class="back-btn" onclick="showScreen('admin-dashboard')">Back</button>
+                  </div>
+                  <input type="date" id="attendance-date" value="${today}" style="width: 90%; margin-bottom: 15px; font-family: sans-serif; text-align: center;">`;
+
+      let currentGroupHeader = "";
+
+      // Sort students by Group, then Alphabetically by Name
+      let sortedStudents = [...allStudents].sort((a, b) => {
+          if (a.group === b.group) return a.name.localeCompare(b.name);
+          return a.group.localeCompare(b.group, undefined, {numeric: true});
+      });
+
+      sortedStudents.forEach(s => {
+          // Inject Group Headers
+          if (s.group !== currentGroupHeader) {
+              currentGroupHeader = s.group;
+              html += `<div style="background-color: teal; color: white; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">GROUP ${s.group}</div>`;
+          }
+
+          const isPresent = attendanceState[s.pin] === 'Present';
+
+          // Render Row with Toggle Button
+          html += `
+          <div class="action-row" style="flex-direction: row; justify-content: space-between; align-items: center;">
+            <div class="action-title" style="margin-bottom: 0;">${s.name}</div>
+            <div onclick="toggleAttendance('${s.pin}')" style="cursor: pointer; padding: 6px 15px; border-radius: 5px; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; ${isPresent ? 'background-color: #e8f5e9; color: forestgreen; border: 1px solid forestgreen;' : 'background-color: #ffebee; color: crimson; border: 1px solid crimson;'}">
+              ${isPresent ? 'PRESENT ✔&#xFE0E;' : 'ABSENT ✘&#xFE0E;'}
+            </div>
+          </div>`;
+      });
+
+      html += `<div id="save-bar"><button class="save-btn" onclick="submitAttendance()">Save Attendance</button></div>`;
+
+      document.getElementById('attendance-screen').innerHTML = html;
+      showScreen('attendance-screen');
+    }
+
+    function toggleAttendance(pin) {
+      // Flip the state and re-render
+      attendanceState[pin] = attendanceState[pin] === 'Present' ? 'Absent' : 'Present';
+      renderAttendanceScreen();
+    }
+
+    function submitAttendance() {
+      const dateVal = document.getElementById('attendance-date').value;
+      if (!dateVal) return alert("Please select a date.");
+
+      // Gather only the absentees for the backend
+      const absentees = [];
+      allStudents.forEach(s => {
+         if (attendanceState[s.pin] === 'Absent') {
+             // Backend uses whatsappnum field, we pass the PIN so it logs correctly
+             absentees.push({ name: s.name, whatsappnum: s.pin }); 
+         }
+      });
+
+      // Update UI while saving
+      document.querySelector('#attendance-screen .save-btn').innerText = "Saving to Database...";
+
+      apiCall({
+        action: 'markAttendance',
+        date: dateVal,
+        absentees: absentees
+      }).then(res => {
+         if (res.success) {
+             alert("Attendance saved successfully!");
+             showScreen('admin-dashboard'); // Go back to dashboard
+         } else {
+             alert("Failed to save attendance: " + res.message);
+             document.querySelector('#attendance-screen .save-btn').innerText = "Save Attendance";
+         }
+      }).catch(err => {
+         alert("Network Error. Please try again.");
+         document.querySelector('#attendance-screen .save-btn').innerText = "Save Attendance";
       });
     }
   </script>
