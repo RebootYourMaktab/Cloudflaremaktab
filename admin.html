@@ -139,7 +139,7 @@ input, select {
       apiCall({ action: 'adminLogin', pin: pin, token: urlToken }).then(data => {
         if (data.success) {
           adminPin = pin;
-          document.getElementById('welcome-message').innerHTML = `<h1>${data.adminData.name}</h1><h2 style="margin-bottom: 5px">* Ahlan wa sahlan *</h2>`;
+          document.getElementById('welcome-message').innerHTML = `<h1>Muallimah ${data.adminData.name}</h1><h2 style="margin-bottom: 5px">** Ahlan wa sahlan **</h2>`;
           fetchDashboardData();
         } else {
            document.getElementById('error-message').innerText = data.message || "Invalid Token or PIN.";
