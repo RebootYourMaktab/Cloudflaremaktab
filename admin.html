@@ -163,21 +163,415 @@
         console.error("Screen ID container not found: " + screenId);
       }
     }
+// Helper: Get first and last day of current month in YYYY-MM-DD
+    function getDefaultDateRange() {
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      return {
+        start: firstDay.toISOString().split('T')[0],
+        end: now.toISOString().split('T')[0]
+      };
+    }
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTSI8edGh-riqutqrOci9d66hKos8a7kcB7VDw6FsUhZw91C4IvHOlKvR47Vr_DHqK/exec";
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get('token'); 
 
-    // Dummy verification script logic (Replace with your actual pin logic)
+    // Global State
+    let adminPin = "";
+        let allAttendance = []; // Store fetched attendance records
+let allStudents = [];
+    let attendanceState = {}; // Keeps track of who is present/absent
+    let allTasks = [];
+    let studentsMap = {};
+    let currentContext = { type: null, value: null }; // type: 'class', 'group', 'student'
+    let currentCategory = null;
+    let currentTask = null;
+    let pendingUpdates = {}; 
+
+    function apiCall(payload) {
+      return fetch(SCRIPT_URL, {
+        method: 'POST', redirect: 'follow', 
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      }).then(r => r.json());
+    }
+
+    // Initialization
+    window.onload = function() {
+        apiCall({ action: 'getQuote' }).then(data => {
+            document.getElementById('quote-box').innerText = (data && data.success && data.quote) ? `"${data.quote}"` : '"Messenger of Allah (ﷺ) said: Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him"';
+        }).catch(() => {});
+    };
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+      document.getElementById(screenId).style.display = 'block';
+    }
+
     function verifyAdminLogin() {
       const pin = document.getElementById('adminPin').value;
-      const errorMessage = document.getElementById('error-message');
+      document.getElementById('error-message').innerHTML = `<h4>Loading data....</h4>`;
       
-      if (pin === "1234") { // Change this to your preferred PIN validation check
-        errorMessage.textContent = "";
-        showScreen('main-menu-screen');
+      apiCall({ action: 'adminLogin', pin: pin, token: urlToken }).then(data => {
+        if (data.success) {
+          adminPin = pin;
+          document.getElementById('welcome-message').innerHTML = `<h1>Muallimah ${data.adminData.name}</h1><h2 style="margin-bottom: 5px">** Ahlan wa sahlan **</h2>`;
+          fetchDashboardData();
+        } else {
+           document.getElementById('error-message').innerText = data.message || "Invalid Token or PIN.";
+        }
+      });
+    }
+
+   function fetchDashboardData() {
+       apiCall({ action: 'getAdminDashboardData' }).then(data => {
+           if (data.success) {
+               allTasks = data.tasks;
+               allStudents = data.students; 
+               
+               // Populate Dropdowns (same as your current code)
+               const grpSelect = document.getElementById('group-selector');
+               grpSelect.innerHTML = '<option value="">Select a Group...</option>';
+               data.groups.forEach(g => grpSelect.innerHTML += `<option value="${g}">Group ${g}</option>`);
+               
+               const stuSelect = document.getElementById('student-selector');
+               stuSelect.innerHTML = '<option value="">Select a Student...</option>';
+               const studentsByGroup = {};
+               data.students.forEach(s => {
+                 studentsMap[s.pin] = s.name;
+                 if (!studentsByGroup[s.group]) studentsByGroup[s.group] = [];
+                 studentsByGroup[s.group].push(s);
+               });
+               Object.keys(studentsByGroup).sort().forEach(group => {
+                 let optgroup = document.createElement('optgroup');
+                 optgroup.label = `Group ${group}`;
+                 studentsByGroup[group].sort((a, b) => a.name.localeCompare(b.name)).forEach(s => {
+                   let opt = document.createElement('option');
+                   opt.value = s.pin;
+                   opt.innerText = s.name;
+                   optgroup.appendChild(opt);
+                 });
+                 stuSelect.appendChild(optgroup);
+               });
+
+               // Show Main Menu instead of Progress directly
+               showScreen('main-menu-screen');
+               
+               // Silently fetch attendance data in background so it's ready
+               apiCall({ action: 'getAttendanceData' }).then(attData => {
+                 if(attData.success) allAttendance = attData.records;
+               });
+
+           } else {
+               document.getElementById('error-message').innerText = "Data failed to load.";
+           }
+       });
+    }
+
+    // --- MATH & FILTERING CORE ---
+    function getFilteredTasks() {
+      if (currentContext.type === 'group') return allTasks.filter(t => t.group === currentContext.value);
+      if (currentContext.type === 'student') return allTasks.filter(t => t.pin === currentContext.value);
+      return allTasks; // Class
+    }
+
+    function calcVerification(tasksArray) {
+      if (tasksArray.length === 0) return 0;
+      const verified = tasksArray.filter(t => t.verification === 'Verified').length;
+      return Math.round((verified / tasksArray.length) * 100);
+    }
+
+    // --- NAVIGATION FLOW ---
+    function openContext(type, value) {
+      if ((type === 'group' || type === 'student') && !value) return alert("Please select an option.");
+      currentContext = { type, value };
+      renderCategoriesScreen();
+    }
+
+    function renderCategoriesScreen() {
+      const targetTasks = getFilteredTasks();
+      const categories = [...new Set(targetTasks.map(t => t.category))];
+      
+      let title = currentContext.type === 'class' ? "Class Categories" : 
+                  currentContext.type === 'group' ? `Group ${currentContext.value} Categories` :
+                  `${studentsMap[currentContext.value]}'s Categories`;
+
+      let html = `<div class="nav-header">
+                    <h2 class="nav-title">${title}</h2>
+                    <button class="back-btn" onclick="showScreen('admin-dashboard')">Back</button>
+                  </div>`;
+
+      categories.forEach(cat => {
+        const catTasks = targetTasks.filter(t => t.category === cat);
+        const percent = calcVerification(catTasks);
+        html += `<button class="list-btn" onclick="openCategory('${cat}')">
+                   ${cat} <span class="indicator">${percent}% Verified</span>
+                 </button>`;
+      });
+
+      document.getElementById('categories-screen').innerHTML = html;
+      showScreen('categories-screen');
+    }
+
+    function openCategory(category) {
+      currentCategory = category;
+      // If we are looking at a specific student, skip the Task list and go straight to their actions
+      if (currentContext.type === 'student') {
+        renderActionScreen();
       } else {
-        errorMessage.textContent = "Invalid PIN. Please try again.";
+        renderTasksScreen();
       }
     }
 
-    // Placeholder functions to prevent console errors from click actions
+    function renderTasksScreen() {
+      const targetTasks = getFilteredTasks().filter(t => t.category === currentCategory);
+      const tasks = [...new Set(targetTasks.map(t => t.task))];
+      
+      let html = `<div class="nav-header">
+                    <h2 class="nav-title">${currentCategory}</h2>
+                    <button class="back-btn" onclick="showScreen('categories-screen')">Back</button>
+                  </div>`;
+
+      tasks.forEach(task => {
+        const specificTasks = targetTasks.filter(t => t.task === task);
+        const percent = calcVerification(specificTasks);
+        html += `<button class="list-btn" onclick="openTask('${task}')">
+                   ${task} <span class="indicator">${percent}% Verified</span>
+                 </button>`;
+      });
+
+      document.getElementById('tasks-screen').innerHTML = html;
+      showScreen('tasks-screen');
+    }
+
+    function openTask(task) {
+      currentTask = task;
+      renderActionScreen();
+    }
+
+    // --- ACTION LIST RENDERING ---
+
+      function renderActionScreen() {
+      let activeTasks = [];
+      let title = "";
+      let backTarget = "";
+
+      if (currentContext.type === 'student') {
+        // Individual path: Show all tasks for the selected category
+        activeTasks = getFilteredTasks().filter(t => t.category === currentCategory);
+        title = `${studentsMap[currentContext.value]}: ${currentCategory}`;
+        backTarget = "showScreen('categories-screen')";
+      } else {
+        // Class/Group path: Show all students for the selected task
+        activeTasks = getFilteredTasks().filter(t => t.category === currentCategory && t.task === currentTask);
+        title = `Task: ${currentTask}`;
+        backTarget = "showScreen('tasks-screen')";
+        
+        // SORTING: Group first, then Alphabetically by Name
+        activeTasks.sort((a, b) => {
+            if (a.group === b.group) {
+                return a.name.localeCompare(b.name);
+            }
+            // Use numeric sorting for groups if possible, otherwise string sort
+            return a.group.localeCompare(b.group, undefined, {numeric: true});
+        });
+      }
+
+      let html = `<div class="nav-header">
+                    <h2 class="nav-title">${title}</h2>
+                    <button class="back-btn" onclick="${backTarget}">Back</button>
+                  </div>`;
+
+      let currentGroupHeader = "";
+
+      activeTasks.forEach(t => {
+        // Overlay any pending changes that haven't been saved to DB yet
+        const displayStatus = pendingUpdates[t.rowId]?.status || t.status;
+        const displayVerif = pendingUpdates[t.rowId]?.verification || t.verification;
+        
+        // Inject Group Headers for Class/Group views
+        if (currentContext.type !== 'student') {
+            if (t.group !== currentGroupHeader) {
+                currentGroupHeader = t.group;
+                html += `
+                  <div style="background-color: teal; color: #424242; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">
+                    GROUP ${t.group}
+                  </div>`;
+            }
+        }
+const labelText = currentContext.type === 'student' 
+  ? t.task 
+  : `<span style="color: WhiteSmoke; font-weight: normal; font-size: 1rem;">${t.name}</span>`;
+
+        html += `
+          <div class="action-row">
+            <div class="action-title">${labelText}</div>
+            <div class="toggle-container">
+              <div class="toggle-item" onclick="toggleLocalStatus(${t.rowId})">
+
+    
+                ${displayStatus === 'Completed' ? '<span class="tick-green">✓</span>' : '<span class="text-grey">To be completed</span>'}
+              </div>
+              <div class="toggle-item" onclick="toggleLocalVerif(${t.rowId})">
+                ${displayVerif === 'Verified' ? '<span class="tick-gold">✓</span>' : '<span class="text-grey">To be verified</span>'}
+              </div>
+            </div>
+          </div>`;
+      });
+
+      if (Object.keys(pendingUpdates).length > 0) {
+         html += `<div id="save-bar"><button class="save-btn" onclick="saveBatchUpdates()">Save Changes</button></div>`;
+      }
+
+      document.getElementById('action-screen').innerHTML = html;
+      showScreen('action-screen');
+    }
+    
+        
+
+    // --- TOGGLE LOGIC ---
+    function toggleLocalStatus(rowId) {
+      const originalTask = allTasks.find(t => t.rowId === rowId);
+      if (!pendingUpdates[rowId]) pendingUpdates[rowId] = { status: originalTask.status, verification: originalTask.verification, rowId: rowId };
+      
+      pendingUpdates[rowId].status = pendingUpdates[rowId].status === 'Completed' ? 'To be completed' : 'Completed';
+      renderActionScreen();
+    }
+
+    function toggleLocalVerif(rowId) {
+      const originalTask = allTasks.find(t => t.rowId === rowId);
+      if (!pendingUpdates[rowId]) pendingUpdates[rowId] = { status: originalTask.status, verification: originalTask.verification, rowId: rowId };
+      
+      pendingUpdates[rowId].verification = pendingUpdates[rowId].verification === 'Verified' ? 'Unverified' : 'Verified';
+      
+      // Auto-complete status if they mark it verified
+      if (pendingUpdates[rowId].verification === 'Verified') pendingUpdates[rowId].status = 'Completed';
+      
+      renderActionScreen();
+    }
+
+    // --- SAVE LOGIC ---
+    function saveBatchUpdates() {
+      const changesArr = Object.values(pendingUpdates);
+      if (changesArr.length === 0) return;
+
+      document.querySelector('.save-btn').innerText = "Saving...";
+      
+      apiCall({ action: 'adminUpdateTasks', changes: changesArr }).then(res => {
+         if (res.success) {
+            // Apply changes locally to avoid needing to refresh all data
+            changesArr.forEach(c => {
+               const taskIndex = allTasks.findIndex(t => t.rowId === c.rowId);
+               if (taskIndex > -1) {
+                  allTasks[taskIndex].status = c.status;
+                  allTasks[taskIndex].verification = c.verification;
+               }
+            });
+            pendingUpdates = {}; // Clear queue
+            renderActionScreen(); // Re-render without the save bar
+            alert("Changes saved successfully!");
+         } else {
+            alert("Save failed. Please try again.");
+            document.querySelector('.save-btn').innerText = "Save Changes";
+         }
+      });
+    }
+    // ==========================================
+    // ATTENDANCE FUNCTIONS
+    // ==========================================
+
+    function openAttendance() {
+      // Default everyone to 'Present' when opening the screen
+      attendanceState = {};
+      allStudents.forEach(s => {
+         attendanceState[s.pin] = 'Present';
+      });
+      renderAttendanceScreen();
+    }
+
+    function renderAttendanceScreen() {
+      // Get today's date in YYYY-MM-DD format for the date picker
+      const today = new Date().toISOString().split('T')[0];
+      
+      let html = `<div class="nav-header">
+                    <h2 class="nav-title">Attendance</h2>
+                    <button class="back-btn" onclick="showScreen('admin-dashboard')">Back</button>
+                  </div>
+                  <input type="date" id="attendance-date" value="${today}" style="width: 90%; margin-bottom: 15px; font-family: sans-serif; text-align: center;">`;
+
+      let currentGroupHeader = "";
+
+      // Sort students by Group, then Alphabetically by Name
+      let sortedStudents = [...allStudents].sort((a, b) => {
+          if (a.group === b.group) return a.name.localeCompare(b.name);
+          return a.group.localeCompare(b.group, undefined, {numeric: true});
+      });
+
+      sortedStudents.forEach(s => {
+          // Inject Group Headers
+          if (s.group !== currentGroupHeader) {
+              currentGroupHeader = s.group;
+              html += `<div style="background-color: teal; color: white; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">GROUP ${s.group}</div>`;
+          }
+
+          const isPresent = attendanceState[s.pin] === 'Present';
+
+          // Render Row with Toggle Button
+          html += `
+          <div class="action-row" style="flex-direction: row; justify-content: space-between; align-items: center;">
+            <div class="action-title" style="margin-bottom: 0;">${s.name}</div>
+            <div onclick="toggleAttendance('${s.pin}')" style="cursor: pointer; padding: 6px 15px; border-radius: 5px; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; ${isPresent ? 'background-color: #e8f5e9; color: forestgreen; border: 1px solid forestgreen;' : 'background-color: #ffebee; color: crimson; border: 1px solid crimson;'}">
+              ${isPresent ? 'PRESENT ✔&#xFE0E;' : 'ABSENT ✘&#xFE0E;'}
+            </div>
+          </div>`;
+      });
+
+      html += `<div id="save-bar"><button class="save-btn" onclick="submitAttendance()">Save Attendance</button></div>`;
+
+      document.getElementById('attendance-screen').innerHTML = html;
+      showScreen('attendance-screen');
+    }
+
+    function toggleAttendance(pin) {
+      // Flip the state and re-render
+      attendanceState[pin] = attendanceState[pin] === 'Present' ? 'Absent' : 'Present';
+      renderAttendanceScreen();
+    }
+
+    function submitAttendance() {
+      const dateVal = document.getElementById('attendance-date').value;
+      if (!dateVal) return alert("Please select a date.");
+
+      // Gather only the absentees for the backend
+      const absentees = [];
+      allStudents.forEach(s => {
+         if (attendanceState[s.pin] === 'Absent') {
+             // Backend uses whatsappnum field, we pass the PIN so it logs correctly
+             absentees.push({ name: s.name, whatsappnum: s.pin }); 
+         }
+      });
+
+      // Update UI while saving
+      document.querySelector('#attendance-screen .save-btn').innerText = "Saving to Database...";
+
+      apiCall({
+        action: 'markAttendance',
+        date: dateVal,
+        absentees: absentees
+      }).then(res => {
+         if (res.success) {
+             alert("Attendance saved successfully!");
+             showScreen('admin-dashboard'); // Go back to dashboard
+         } else {
+             alert("Failed to save attendance: " + res.message);
+             document.querySelector('#attendance-screen .save-btn').innerText = "Save Attendance";
+         }
+      }).catch(err => {
+         alert("Network Error. Please try again.");
+         document.querySelector('#attendance-screen .save-btn').innerText = "Save Attendance";
+      });
+    }
+  
     function openContext(type, val) { console.log(`Opening context: ${type} with value: ${val}`); }
     function openMarkRegister() { showScreen('attendance-action-screen'); }
     function openViewAttendance() { console.log('Viewing Attendance Records'); }
