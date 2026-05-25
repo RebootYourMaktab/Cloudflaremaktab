@@ -36,8 +36,8 @@ input, select {
 }
     button { background-color: WhiteSmoke; color: teal; border: 3px solid teal; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
     button:active { background-color: teal; color: WhiteSmoke; transform: scale(0.95); }
-    
-    .quote-box { margin-top: 30px; margin-bottom: 20px; font-size: 1rem; font-family: 'Comic Sans MS'; color: teal; line-height: 1.4; padding: 20px 10px; min-height: 40px; border: 1px dashed teal; border-radius: 12px; }
+
+    .quote-box { margin-top: 30px; margin-bottom: 20px; font-size: 1rem; font-weight: normal; color: WhiteSmoke; line-height: 1.4; padding: 20px 10px; min-height: 40px; border: 1px dashed teal; border-radius: 12px; }
 
     /* New Dashboard UI Elements */
     .dashboard-section { background-color: WhiteSmoke; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(0,128,128, 0.2); }
@@ -322,7 +322,7 @@ input, select {
         }
 const labelText = currentContext.type === 'student' 
   ? t.task 
-  : `<span style="color: grey; font-weight: normal; font-size: 1rem;">${t.name}</span>`;
+  : `<span style="color: WhiteSmoke; font-weight: normal; font-size: 1rem;">${t.name}</span>`;
 
         html += `
           <div class="action-row">
