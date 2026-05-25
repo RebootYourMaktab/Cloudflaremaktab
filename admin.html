@@ -12,10 +12,8 @@
     body { background-color: silver; color: teal; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     h1, h2, h3, h4 { color: teal; font-family: 'GAGALIN', cursive; letter-spacing: 1px; font-weight: normal; margin-top: 0;}
     
-    /* SYSTEM WORKHORSE: Screens are hidden by default */
     .view { display: none !important; }
     
-    /* Only show the screen when it contains the active class */
     .view.active { 
       display: block !important; 
       background-color: silver; 
@@ -27,7 +25,6 @@
       max-width: 600px; 
     }
     
-    /* Login screen specific width constraint */
     #login-screen.active { max-width: 400px; }    
     
     .app-logo { width: 35vw; max-width: 140px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%; background-color: transparent; margin-bottom: 15px; }
@@ -39,7 +36,6 @@
 
     .quote-box { margin-top: 30px; margin-bottom: 20px; font-size: 1rem; font-weight: normal; color: WhiteSmoke; line-height: 1.4; padding: 20px 10px; min-height: 40px; border: 1px dashed teal; border-radius: 12px; }
 
-    /* Dashboard UI Elements */
     .dashboard-section { background-color: WhiteSmoke; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(0,128,128, 0.2); }
     .list-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; text-align: left; }
     .indicator { background: rgba(0,128,128,0.1); padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; font-family: sans-serif; color: teal;}
@@ -47,10 +43,8 @@
     .nav-title { font-size: 1.3rem; margin: 0; }
     .back-btn { background-color: teal; color: WhiteSmoke; font-size: 0.9rem; padding: 5px 10px; margin: 0; }
 
-    /* Layout Grids */
     .button-grid { display: grid; }
 
-    /* Toggle UI for Students/Tasks */
     .action-row { border-bottom: 1px solid #eee; padding: 15px 0; text-align: left; display: flex; flex-direction: column; }
     .action-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; color: teal; }
     .toggle-container { display: flex; justify-content: space-around; background: WhiteSmoke; padding: 10px; border-radius: 8px; }
@@ -128,7 +122,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get('token'); 
 
-    // Global State
     let adminPin = "";
     let allAttendance = []; 
     let allStudents = [];
@@ -140,7 +133,6 @@
     let currentTask = null;
     let pendingUpdates = {}; 
 
-    // Helper: Screen Switcher
     function showScreen(screenId) {
       document.querySelectorAll('.view').forEach(screen => {
         screen.classList.remove('active');
@@ -159,7 +151,6 @@
       }).then(r => r.json());
     }
 
-    // Initialization
     window.onload = function() {
         apiCall({ action: 'getQuote' }).then(data => {
             document.getElementById('quote-box').innerText = (data && data.success && data.quote) ? `"${data.quote}"` : '"Messenger of Allah (ﷺ) said: Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him"';
@@ -187,12 +178,10 @@
                allTasks = data.tasks;
                allStudents = data.students; 
                
-               // Populate Group Dropdown
                const grpSelect = document.getElementById('group-selector');
                grpSelect.innerHTML = '<option value="">Select a Group...</option>';
                data.groups.forEach(g => grpSelect.innerHTML += `<option value="${g}">Group ${g}</option>`);
                
-               // Populate Student Dropdown 
                const stuSelect = document.getElementById('student-selector');
                stuSelect.innerHTML = '<option value="">Select a Student...</option>';
                const studentsByGroup = {};
@@ -213,23 +202,17 @@
                  stuSelect.appendChild(optgroup);
                });
 
-               // Show Main Menu instead of Progress directly
                showScreen('main-menu-screen');
                
-               // Silently fetch attendance data in background
                apiCall({ action: 'getAttendanceData' }).then(attData => {
                  if(attData && attData.success) allAttendance = attData.records;
-               });
+               }).catch(() => {});
 
            } else {
                document.getElementById('error-message').innerText = "Data failed to load.";
            }
        });
     }
-
-    // ==========================================
-    // PROGRESS FUNCTIONS
-    // ==========================================
 
     function getFilteredTasks() {
       if (currentContext.type === 'group') return allTasks.filter(t => t.group === currentContext.value);
@@ -415,10 +398,6 @@
       });
     }
 
-    // ==========================================
-    // ATTENDANCE FUNCTIONS
-    // ==========================================
-
     function openMarkRegister() { openAttendance(); }
 
     function openAttendance() {
@@ -440,4 +419,70 @@
 
       let currentGroupHeader = "";
       let sortedStudents = [...allStudents].sort((a, b) => {
-          if (
+          if (a.group === b.group) return a.name.localeCompare(b.name);
+          return a.group.localeCompare(b.group, undefined, {numeric: true});
+      });
+
+      sortedStudents.forEach(s => {
+          if (s.group !== currentGroupHeader) {
+              currentGroupHeader = s.group;
+              html += `<div style="background-color: teal; color: white; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">GROUP ${s.group}</div>`;
+          }
+
+          const isPresent = attendanceState[s.pin] === 'Present';
+          html += `
+          <div class="action-row" style="flex-direction: row; justify-content: space-between; align-items: center;">
+            <div class="action-title" style="margin-bottom: 0;">${s.name}</div>
+            <div onclick="toggleAttendance('${s.pin}')" style="cursor: pointer; padding: 6px 15px; border-radius: 5px; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; ${isPresent ? 'background-color: #e8f5e9; color: forestgreen; border: 1px solid forestgreen;' : 'background-color: #ffebee; color: crimson; border: 1px solid crimson;'}">
+              ${isPresent ? 'PRESENT ✔&#xFE0E;' : 'ABSENT ✘&#xFE0E;'}
+            </div>
+          </div>`;
+      });
+
+      html += `<div id="save-bar"><button class="save-btn" onclick="submitAttendance()">Save Attendance</button></div>`;
+
+      document.getElementById('attendance-action-screen').innerHTML = html;
+      showScreen('attendance-action-screen');
+    }
+
+    function toggleAttendance(pin) {
+      attendanceState[pin] = attendanceState[pin] === 'Present' ? 'Absent' : 'Present';
+      renderAttendanceScreen();
+    }
+
+    function submitAttendance() {
+      const dateVal = document.getElementById('attendance-date').value;
+      if (!dateVal) return alert("Please select a date.");
+
+      const absentees = [];
+      allStudents.forEach(s => {
+         if (attendanceState[s.pin] === 'Absent') {
+             absentees.push({ name: s.name, whatsappnum: s.pin }); 
+         }
+      });
+
+      document.querySelector('#attendance-action-screen .save-btn').innerText = "Saving to Database...";
+
+      apiCall({
+        action: 'markAttendance',
+        date: dateVal,
+        absentees: absentees
+      }).then(res => {
+         if (res.success) {
+             alert("Attendance saved successfully!");
+             showScreen('attendance-dashboard'); 
+         } else {
+             alert("Failed to save attendance: " + res.message);
+             document.querySelector('#attendance-action-screen .save-btn').innerText = "Save Attendance";
+         }
+      }).catch(err => {
+         alert("Network Error. Please try again.");
+         document.querySelector('#attendance-action-screen .save-btn').innerText = "Save Attendance";
+      });
+    }
+
+    function openViewAttendance() { alert('Viewing Attendance Records coming soon!'); }
+    function openAttendanceStats() { alert('Viewing Attendance Stats coming soon!'); }
+  </script>
+</body>
+</html>
