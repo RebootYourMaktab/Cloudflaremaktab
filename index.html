@@ -9,11 +9,16 @@
 
 
   <style>
-    body { background-color: tan ; color: maroon; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { background-color: tan ; color: maroon; 
+      font-family: sans-serif; display: flex; justify-content: center; 
+      align-items: center; min-height: 100vh; margin: 0; padding: 10px;
+       box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     h1, h2, h3, h4 { color: maroon; font-family: 'GAGALIN', cursive; letter-spacing: 1px; font-weight: normal; margin-top: 0;}
-    .screen { background-color: wheat; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); text-align: center; width: 100%; max-width: 400px; }
+    .screen { background-color: wheat; padding: 20px; border-radius: 10px; 
+      box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); text-align: center; width: 100%; max-width: 400px; }
     #dashboard-screen, #task-screen { display: none; width: 100%; max-width: 600px; }
-   .app-logo { 
+  
+    .app-logo { 
        width: 35vw;             /* Takes up 35% of the screen's width on small devices */
      max-width: 140px;        /* ...but stops growing once it hits 140px on larger screens */
        aspect-ratio: 1 / 1;     /* MAGIC FIX: Automatically forces the height to perfectly match the width */
@@ -34,19 +39,20 @@ input, select {
 }    button { background-color: maroon; color: Seashell; border: 3px solid maroon; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
     button:active { background-color: maroon; color: Seashell; transform: scale(0.95); }
     .login-btn { width: 90%; padding: 12px; }
-    .save-exit-btn { background-color: maroon; color: transparent; padding: 10px 20px; font-size: 1.2rem; margin-top: 20px; }
+    .save-exit-btn { background-color: maroon; color: Seashell; padding: 10px 20px; font-size: 1.2rem; margin-top: 20px; }
     
     .exit-app-btn { background-color: maroon; color: tan;  padding: 10px 20px; font-size: 1.1rem; margin-top: 30px; }
     
     .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
     .category-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px 10px; height: 100%; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; background-color: Wheat; }
-    th, td { padding: 10px 5px; border-bottom: 2px solid rgba(128,0,0,0.1); font-size: 0.9rem;}
+    table { width: 100%; border-collapse: collapse;
+      table-layout: fixed; margin-top: 10px; background-color: Wheat; }
+    th, td { text-align: left; padding: 10px 5px; border-bottom: 2px solid rgba(128,0,0,0.1); font-size: 0.9rem;}
     th { font-family: 'Gagalin', sans-serif; color: maroon; text-align: center; }
     .status-toggle { cursor: pointer; }
     .forest-tick { color: limegreen; font-size: 1.5rem; }
     .maroon-tick { color: maroon; font-size: 1.5rem; }
-    .gray-cloud { background-color: #f0f0f0; color: #777; font-size: 0.7rem; padding: 3px 6px; border-radius: 10px; }
+    .gray-cloud { background-color: transparent; color: lightgrey; font-size: 0.7rem; padding: 3px 6px; border-radius: 10px; }
     .progress-container { width: 100%; background-color: rgba(128, 0, 0, 0.1); border-radius: 5px; height: 8px; margin-top: 8px; overflow: hidden; }
     .progress-fill { background-color: limegreen; height: 100%; transition: width 0.3s ease; }
     
