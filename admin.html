@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="preconnect" href="https://googleapis.com">
   <link rel="preconnect" href="https://gstatic.com" crossorigin>
-  <link href="https://cdnfonts.com" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/gagalin" rel="stylesheet">
+
 
   <style>
     body { background-color: silver; color: teal; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -36,7 +37,7 @@
 
     .quote-box { margin-top: 30px; margin-bottom: 20px; font-size: 1rem; font-weight: normal; color: WhiteSmoke; line-height: 1.4; padding: 20px 10px; min-height: 40px; border: 1px dashed teal; border-radius: 12px; }
 
-    .dashboard-section { background-color: WhiteSmoke; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(0,128,128, 0.2); }
+    .dashboard-section { background-color: grey; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(0,128,128, 0.2); }
     .list-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; text-align: left; }
     .indicator { background: rgba(0,128,128,0.1); padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; font-family: sans-serif; color: teal;}
     .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid teal; padding-bottom: 10px; }
@@ -53,7 +54,6 @@
     .tick-gold { color: goldenrod; font-weight: bold; font-size: 1.5rem; }
     .text-grey { color: grey; font-size: 0.8rem; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px;}
     
-    #save-bar { position: sticky; bottom: 0; background: #424242; padding: 15px; border-top: 2px solid teal; margin-top: 20px; border-radius: 0 0 10px 10px;}
     .save-btn { background-color: teal; color: #424242; border-color: teal; width: 100%; }
   </style>
 </head>
@@ -72,11 +72,11 @@
     <div id="welcome-message"></div>
     <h2>Admin Dashboard</h2>
     <div class="button-grid" style="grid-template-columns: 1fr; gap: 15px;">
-      <button class="list-btn" onclick="showScreen('progress-dashboard')" style="justify-content: center; padding: 15px;">📊 Manage Progress</button>
-      <button class="list-btn" onclick="showScreen('attendance-dashboard')" style="justify-content: center; padding: 15px;">📋 Manage Attendance</button>
-      <button class="list-btn" onclick="alert('Student Records coming soon!')" style="justify-content: center; padding: 15px; background: #eee; color: #999; border-color: #ccc;">📁 Student Records</button>
+      <button class="list-btn" onclick="showScreen('progress-dashboard')" style="background: #004c4c; color: Whitesmoke; border-color: #004c4c; justify-content: center; padding: 15px;"> Manage Progress</button>
+      <button class="list-btn" onclick="showScreen('attendance-dashboard')" style="background: #006666; color: Whitesmoke; border-color: #006666; justify-content: center; padding: 15px;">Manage Attendance</button>
+      <button class="list-btn" onclick="alert('Student Records coming soon!')" style="background: #008080; color: Whitesmoke; border-color: #008080; justify-content: center; padding: 15px; background: #eee; color: #999; border-color: #ccc;"> Student Records</button>
     </div>
-    <button onclick="location.reload()" style="background: darkred; color: white; border-color: maroon; margin-top: 30px; width: 100%;">Log Out</button>
+    <button onclick="location.reload()" style="background: iridium; color: Whitesmoke; border-color: iridium; margin-top: 30px; width: 100%;">Log Out</button>
   </div>
 
   <div id="progress-dashboard" class="view">
@@ -84,7 +84,7 @@
       <h2 class="nav-title">Progress</h2>
       <button class="back-btn" onclick="showScreen('main-menu-screen')">Back</button>
     </div>
-    <div class="dashboard-section">
+    <div class="dashboard-section" style=>
       <h3>Class Progress</h3>
       <button class="list-btn" onclick="openContext('class', null)" style="justify-content: center;">View Full Class</button>
     </div>
@@ -106,9 +106,9 @@
       <button class="back-btn" onclick="showScreen('main-menu-screen')">Back</button>
     </div>
     <div class="button-grid" style="grid-template-columns: 1fr; gap: 10px;">
-      <button class="list-btn" onclick="openMarkRegister()" style="justify-content: center;">📝 Mark Register</button>
-      <button class="list-btn" onclick="openViewAttendance()" style="justify-content: center;">🔍 View Records</button>
-      <button class="list-btn" onclick="openAttendanceStats()" style="justify-content: center;">📈 Attendance Stats</button>
+      <button class="list-btn" onclick="openMarkRegister()" style="justify-content: center;"> Mark Register</button>
+      <button class="list-btn" onclick="openViewAttendance()" style="justify-content: center;"> View Records</button>
+      <button class="list-btn" onclick="openAttendanceStats()" style="justify-content: center;"> Attendance Stats</button>
     </div>
   </div>
 
@@ -164,7 +164,7 @@
       apiCall({ action: 'adminLogin', pin: pin, token: urlToken }).then(data => {
         if (data.success) {
           adminPin = pin;
-          document.getElementById('welcome-message').innerHTML = `<h1>Muallimah ${data.adminData.name}</h1><h2 style="margin-bottom: 5px">** Ahlan wa sahlan **</h2>`;
+          document.getElementById('welcome-message').innerHTML = `<h1>Muallimah<br>${data.adminData.name}</h1><h2 style="margin-bottom: 5px">** Ahlan wa sahlan **</h2>`;
           fetchDashboardData();
         } else {
            document.getElementById('error-message').innerText = data.message || "Invalid Token or PIN.";
