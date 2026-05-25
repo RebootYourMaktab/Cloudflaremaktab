@@ -8,39 +8,39 @@
   <link href="https://fonts.cdnfonts.com/css/gagalin" rel="stylesheet">
 
 <style>
-    body { background-color: blanchedalmond; color: teal; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { background-color: WhiteSmoke; color: teal; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     h1, h2, h3, h4 { color: teal; font-family: 'GAGALIN', cursive; letter-spacing: 1px; font-weight: normal; margin-top: 0;}
     
     /* FIX: Screens are hidden by default to prevent side-by-side bug */
-    .screen { display: none; background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); text-align: center; width: 100%; max-width: 600px; }
+    .screen { display: none; background-color: #424242; padding: 20px; border-radius: 10px; box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); text-align: center; width: 100%; max-width: 600px; }
     #login-screen { display: block; max-width: 400px; } /* Login is explicitly visible on load */
     
-    .app-logo { width: 140px; height: auto; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 4px 8px rgba(128, 0, 0, 0.2); }
+    .app-logo { width: 140px; height: auto; margin-bottom: 15px;  }
     input, select { padding: 12px; margin: 10px 0 20px 0; border-radius: 5px; border: 1px solid teal; width: 85%; font-size: 1rem; color: teal; }
-    button { background-color: blanchedalmond; color: teal; border: 3px solid teal; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
-    button:active { background-color: teal; color: blanchedalmond; transform: scale(0.95); }
+    button { background-color: WhiteSmoke; color: teal; border: 3px solid teal; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
+    button:active { background-color: teal; color: WhiteSmoke; transform: scale(0.95); }
     
     .quote-box { margin-top: 30px; margin-bottom: 20px; font-size: 1rem; font-family: 'Comic Sans MS'; color: teal; line-height: 1.4; padding: 20px 10px; min-height: 40px; border: 1px dashed teal; border-radius: 12px; }
 
     /* New Dashboard UI Elements */
-    .dashboard-section { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(0,128,128, 0.2); }
+    .dashboard-section { background-color: #424242; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(0,128,128, 0.2); }
     .list-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; text-align: left; }
     .indicator { background: rgba(0,128,128,0.1); padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; font-family: sans-serif; color: teal;}
     .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid teal; padding-bottom: 10px; }
     .nav-title { font-size: 1.3rem; margin: 0; }
-    .back-btn { background-color: teal; color: blanchedalmond; font-size: 0.9rem; padding: 5px 10px; margin: 0; }
+    .back-btn { background-color: teal; color: WhiteSmoke; font-size: 0.9rem; padding: 5px 10px; margin: 0; }
 
     /* Toggle UI for Students/Tasks */
     .action-row { border-bottom: 1px solid #eee; padding: 15px 0; text-align: left; display: flex; flex-direction: column; }
     .action-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; color: teal; }
-    .toggle-container { display: flex; justify-content: space-around; background: #f9f9f9; padding: 10px; border-radius: 8px; }
+    .toggle-container { display: flex; justify-content: space-around; background: #424242; padding: 10px; border-radius: 8px; }
     .toggle-item { cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 45%; }
     .tick-green { color: forestgreen; font-weight: bold; font-size: 1.5rem; }
     .tick-gold { color: goldenrod; font-weight: bold; font-size: 1.5rem; }
     .text-grey { color: grey; font-size: 0.8rem; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px;}
     
-    #save-bar { position: sticky; bottom: 0; background: white; padding: 15px; border-top: 2px solid teal; margin-top: 20px; border-radius: 0 0 10px 10px;}
-    .save-btn { background-color: forestgreen; color: white; border-color: darkgreen; width: 100%; }
+    #save-bar { position: sticky; bottom: 0; background: #424242; padding: 15px; border-top: 2px solid teal; margin-top: 20px; border-radius: 0 0 10px 10px;}
+    .save-btn { background-color: forestgreen; color: #424242; border-color: darkgreen; width: 100%; }
   </style>
 </head>
 <body>
@@ -74,7 +74,7 @@
       <button class="list-btn" onclick="openContext('student', document.getElementById('student-selector').value)" style="justify-content: center;">View Student</button>
     </div>
 
-    <button onclick="location.reload()" style="background: teal; color: white; border-color: teal ; margin-top: 20px;">Exit Dashboard</button>
+    <button onclick="location.reload()" style="background: teal; color: #424242; border-color: teal ; margin-top: 20px;">Exit Dashboard</button>
   </div>
 
   <div id="categories-screen" class="screen"></div>
@@ -298,7 +298,7 @@
             if (t.group !== currentGroupHeader) {
                 currentGroupHeader = t.group;
                 html += `
-                  <div style="background-color: teal; color: white; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">
+                  <div style="background-color: teal; color: #424242; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">
                     GROUP ${t.group}
                   </div>`;
             }
