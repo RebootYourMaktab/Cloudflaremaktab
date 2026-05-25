@@ -13,9 +13,7 @@
     h1, h2, h3, h4 { color: teal; font-family: 'GAGALIN', cursive; letter-spacing: 1px; font-weight: normal; margin-top: 0;}
     
     /* SYSTEM WORKHORSE: Screens are hidden by default */
-    .view { 
-      display: none !important; 
-    }
+    .view { display: none !important; }
     
     /* Only show the screen when it contains the active class */
     .view.active { 
@@ -30,29 +28,11 @@
     }
     
     /* Login screen specific width constraint */
-    #login-screen.active { 
-      max-width: 400px; 
-    }    
+    #login-screen.active { max-width: 400px; }    
     
-    .app-logo { 
-      width: 35vw;             
-      max-width: 140px;        
-      aspect-ratio: 1 / 1;     
-      object-fit: cover;       
-      border-radius: 50%;      
-      background-color: transparent; 
-      margin-bottom: 15px; 
-    }
+    .app-logo { width: 35vw; max-width: 140px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 50%; background-color: transparent; margin-bottom: 15px; }
     
-    input, select { 
-      padding: 12px; 
-      margin: 10px 0 20px 0; 
-      border-radius: 5px; 
-      border: 1px solid teal; 
-      width: 85%; 
-      font-size: 1rem; 
-      color: teal; 
-    }
+    input, select { padding: 12px; margin: 10px 0 20px 0; border-radius: 5px; border: 1px solid teal; width: 85%; font-size: 1rem; color: teal; }
     
     button { background-color: teal; color: WhiteSmoke; border: 3px solid teal; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
     button:active { background-color: teal; color: WhiteSmoke; transform: scale(0.95); }
@@ -85,17 +65,15 @@
 </head>
 <body>
 
-  <!-- 1. LOGIN SCREEN (Visible on load) -->
   <div id="login-screen" class="view active">
     <img src="logo.png" alt="Maktab Logo" class="app-logo">
     <h2>ADMIN PORTAL</h2>
     <input type="password" id="adminPin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Enter 4-Digit PIN">
     <button onclick="verifyAdminLogin()">Log In to Dashboard</button>
-    <div id="quote-box" class="quote-box">>......</div>
+    <div id="quote-box" class="quote-box">......</div>
     <p id="error-message" style="color: red; font-weight: bold;"></p>
   </div>
 
-  <!-- 2. MAIN DASHBOARD MENU -->
   <div id="main-menu-screen" class="view">
     <div id="welcome-message"></div>
     <h2>Admin Dashboard</h2>
@@ -107,7 +85,6 @@
     <button onclick="location.reload()" style="background: darkred; color: white; border-color: maroon; margin-top: 30px; width: 100%;">Log Out</button>
   </div>
 
-  <!-- 3. PROGRESS DASHBOARD -->
   <div id="progress-dashboard" class="view">
     <div class="nav-header">
       <h2 class="nav-title">Progress</h2>
@@ -129,7 +106,6 @@
     </div>
   </div>
 
-  <!-- 4. ATTENDANCE DASHBOARD -->
   <div id="attendance-dashboard" class="view">
     <div class="nav-header">
       <h2 class="nav-title">Attendance</h2>
@@ -142,340 +118,38 @@
     </div>
   </div>
 
-  <!-- 5. DYNAMIC VIEWS -->
   <div id="categories-screen" class="view"></div>
   <div id="tasks-screen" class="view"></div>
   <div id="action-screen" class="view"></div>
   <div id="attendance-action-screen" class="view"></div>
 
-  <!-- CORE SCREEN NAVIGATION SCRIPT -->
   <script>
-   
-    
-// Helper: Get first and last day of current month in YYYY-MM-DD
-    function getDefaultDateRange() {
-      const now = new Date();
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      return {
-        start: firstDay.toISOString().split('T')[0],
-        end: now.toISOString().split('T')[0]
-      };
-    }
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTSI8edGh-riqutqrOci9d66hKos8a7kcB7VDw6FsUhZw91C4IvHOlKvR47Vr_DHqK/exec";
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get('token'); 
 
     // Global State
     let adminPin = "";
-        let allAttendance = []; // Store fetched attendance records
-let allStudents = [];
-    let attendanceState = {}; // Keeps track of who is present/absent
+    let allAttendance = []; 
+    let allStudents = [];
+    let attendanceState = {}; 
     let allTasks = [];
     let studentsMap = {};
-    let currentContext = { type: null, value: null }; // type: 'class', 'group', 'student'
+    let currentContext = { type: null, value: null }; 
     let currentCategory = null;
     let currentTask = null;
     let pendingUpdates = {}; 
 
-    function apiCall(payload) {
-      return fetch(SCRIPT_URL, {
-        method: 'POST', redirect: 'follow', 
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      }).then(r => r.json());
-    }
-
-    // Initialization
-    window.onload = function() {
-        apiCall({ action: 'getQuote' }).then(data => {
-            document.getElementById('quote-box').innerText = (data && data.success && data.quote) ? `"${data.quote}"` : '"Messenger of Allah (ﷺ) said: Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him"';
-        }).catch(() => {});
-    };
-
-    function showScreen(screenId) {
-      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-      document.getElementById(screenId).style.display = 'block';
-    }
-
-    function verifyAdminLogin() {
-      const pin = document.getElementById('adminPin').value;
-      document.getElementById('error-message').innerHTML = `<h4>Loading data....</h4>`;
-      
-      apiCall({ action: 'adminLogin', pin: pin, token: urlToken }).then(data => {
-        if (data.success) {
-          adminPin = pin;
-          document.getElementById('welcome-message').innerHTML = `<h1>Muallimah ${data.adminData.name}</h1><h2 style="margin-bottom: 5px">** Ahlan wa sahlan **</h2>`;
-          fetchDashboardData();
-        } else {
-           document.getElementById('error-message').innerText = data.message || "Invalid Token or PIN.";
-        }
-      });
-    }
-
-   function fetchDashboardData() {
-       apiCall({ action: 'getAdminDashboardData' }).then(data => {
-           if (data.success) {
-               allTasks = data.tasks;
-               allStudents = data.students; 
-               
-               // Populate Dropdowns (same as your current code)
-               const grpSelect = document.getElementById('group-selector');
-               grpSelect.innerHTML = '<option value="">Select a Group...</option>';
-               data.groups.forEach(g => grpSelect.innerHTML += `<option value="${g}">Group ${g}</option>`);
-               
-               const stuSelect = document.getElementById('student-selector');
-               stuSelect.innerHTML = '<option value="">Select a Student...</option>';
-               const studentsByGroup = {};
-               data.students.forEach(s => {
-                 studentsMap[s.pin] = s.name;
-                 if (!studentsByGroup[s.group]) studentsByGroup[s.group] = [];
-                 studentsByGroup[s.group].push(s);
-               });
-               Object.keys(studentsByGroup).sort().forEach(group => {
-                 let optgroup = document.createElement('optgroup');
-                 optgroup.label = `Group ${group}`;
-                 studentsByGroup[group].sort((a, b) => a.name.localeCompare(b.name)).forEach(s => {
-                   let opt = document.createElement('option');
-                   opt.value = s.pin;
-                   opt.innerText = s.name;
-                   optgroup.appendChild(opt);
-                 });
-                 stuSelect.appendChild(optgroup);
-               });
-
-               // Show Main Menu instead of Progress directly
-               showScreen('main-menu-screen');
-               
-               // Silently fetch attendance data in background so it's ready
-               apiCall({ action: 'getAttendanceData' }).then(attData => {
-                 if(attData.success) allAttendance = attData.records;
-               });
-
-           } else {
-               document.getElementById('error-message').innerText = "Data failed to load.";
-           }
-       });
-    }
-
-    // --- MATH & FILTERING CORE ---
-    function getFilteredTasks() {
-      if (currentContext.type === 'group') return allTasks.filter(t => t.group === currentContext.value);
-      if (currentContext.type === 'student') return allTasks.filter(t => t.pin === currentContext.value);
-      return allTasks; // Class
-    }
-
-    function calcVerification(tasksArray) {
-      if (tasksArray.length === 0) return 0;
-      const verified = tasksArray.filter(t => t.verification === 'Verified').length;
-      return Math.round((verified / tasksArray.length) * 100);
-    }
-
-    // --- NAVIGATION FLOW ---
-    function openContext(type, value) {
-      if ((type === 'group' || type === 'student') && !value) return alert("Please select an option.");
-      currentContext = { type, value };
-      renderCategoriesScreen();
-    }
-
-    function renderCategoriesScreen() {
-      const targetTasks = getFilteredTasks();
-      const categories = [...new Set(targetTasks.map(t => t.category))];
-      
-      let title = currentContext.type === 'class' ? "Class Categories" : 
-                  currentContext.type === 'group' ? `Group ${currentContext.value} Categories` :
-                  `${studentsMap[currentContext.value]}'s Categories`;
-
-      let html = `<div class="nav-header">
-                    <h2 class="nav-title">${title}</h2>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Maktab Admin Portal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="preconnect" href="https://googleapis.com">
-  <link rel="preconnect" href="https://gstatic.com" crossorigin>
-  <link href="https://cdnfonts.com" rel="stylesheet">
-
-  <style>
-    body { background-color: silver; color: teal; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    h1, h2, h3, h4 { color: teal; font-family: 'GAGALIN', cursive; letter-spacing: 1px; font-weight: normal; margin-top: 0;}
-    
-    /* SYSTEM WORKHORSE: Screens are hidden by default */
-    .view { 
-      display: none !important; 
-    }
-    
-    /* Only show the screen when it contains the active class */
-    .view.active { 
-      display: block !important; 
-      background-color: silver; 
-      padding: 20px; 
-      border-radius: 10px; 
-      box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); 
-      text-align: center; 
-      width: 100%; 
-      max-width: 600px; 
-    }
-    
-    /* Login screen specific width constraint */
-    #login-screen.active { 
-      max-width: 400px; 
-    }    
-    
-    .app-logo { 
-      width: 35vw;             
-      max-width: 140px;        
-      aspect-ratio: 1 / 1;     
-      object-fit: cover;       
-      border-radius: 50%;      
-      background-color: transparent; 
-      margin-bottom: 15px; 
-    }
-    
-    input, select { 
-      padding: 12px; 
-      margin: 10px 0 20px 0; 
-      border-radius: 5px; 
-      border: 1px solid teal; 
-      width: 85%; 
-      font-size: 1rem; 
-      color: teal; 
-    }
-    
-    button { background-color: teal; color: WhiteSmoke; border: 3px solid teal; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
-    button:active { background-color: teal; color: WhiteSmoke; transform: scale(0.95); }
-
-    .quote-box { margin-top: 30px; margin-bottom: 20px; font-size: 1rem; font-weight: normal; color: WhiteSmoke; line-height: 1.4; padding: 20px 10px; min-height: 40px; border: 1px dashed teal; border-radius: 12px; }
-
-    /* Dashboard UI Elements */
-    .dashboard-section { background-color: WhiteSmoke; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(0,128,128, 0.2); }
-    .list-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; text-align: left; }
-    .indicator { background: rgba(0,128,128,0.1); padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; font-family: sans-serif; color: teal;}
-    .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid teal; padding-bottom: 10px; }
-    .nav-title { font-size: 1.3rem; margin: 0; }
-    .back-btn { background-color: teal; color: WhiteSmoke; font-size: 0.9rem; padding: 5px 10px; margin: 0; }
-
-    /* Layout Grids */
-    .button-grid { display: grid; }
-
-    /* Toggle UI for Students/Tasks */
-    .action-row { border-bottom: 1px solid #eee; padding: 15px 0; text-align: left; display: flex; flex-direction: column; }
-    .action-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; color: teal; }
-    .toggle-container { display: flex; justify-content: space-around; background: WhiteSmoke; padding: 10px; border-radius: 8px; }
-    .toggle-item { cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 45%; }
-    .tick-green { color: teal; font-weight: bold; font-size: 1.5rem; }
-    .tick-gold { color: goldenrod; font-weight: bold; font-size: 1.5rem; }
-    .text-grey { color: grey; font-size: 0.8rem; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px;}
-    
-    #save-bar { position: sticky; bottom: 0; background: #424242; padding: 15px; border-top: 2px solid teal; margin-top: 20px; border-radius: 0 0 10px 10px;}
-    .save-btn { background-color: teal; color: #424242; border-color: teal; width: 100%; }
-  </style>
-</head>
-<body>
-
-  <!-- 1. LOGIN SCREEN (Visible on load) -->
-  <div id="login-screen" class="view active">
-    <img src="logo.png" alt="Maktab Logo" class="app-logo">
-    <h2>ADMIN PORTAL</h2>
-    <input type="password" id="adminPin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Enter 4-Digit PIN">
-    <button onclick="verifyAdminLogin()">Log In to Dashboard</button>
-    <div id="quote-box" class="quote-box">>......</div>
-    <p id="error-message" style="color: red; font-weight: bold;"></p>
-  </div>
-
-  <!-- 2. MAIN DASHBOARD MENU -->
-  <div id="main-menu-screen" class="view">
-    <div id="welcome-message"></div>
-    <h2>Admin Dashboard</h2>
-    <div class="button-grid" style="grid-template-columns: 1fr; gap: 15px;">
-      <button class="list-btn" onclick="showScreen('progress-dashboard')" style="justify-content: center; padding: 15px;">📊 Manage Progress</button>
-      <button class="list-btn" onclick="showScreen('attendance-dashboard')" style="justify-content: center; padding: 15px;">📋 Manage Attendance</button>
-      <button class="list-btn" onclick="alert('Student Records coming soon!')" style="justify-content: center; padding: 15px; background: #eee; color: #999; border-color: #ccc;">📁 Student Records</button>
-    </div>
-    <button onclick="location.reload()" style="background: darkred; color: white; border-color: maroon; margin-top: 30px; width: 100%;">Log Out</button>
-  </div>
-
-  <!-- 3. PROGRESS DASHBOARD -->
-  <div id="progress-dashboard" class="view">
-    <div class="nav-header">
-      <h2 class="nav-title">Progress</h2>
-      <button class="back-btn" onclick="showScreen('main-menu-screen')">Back</button>
-    </div>
-    <div class="dashboard-section">
-      <h3>Class Progress</h3>
-      <button class="list-btn" onclick="openContext('class', null)" style="justify-content: center;">View Full Class</button>
-    </div>
-    <div class="dashboard-section">
-      <h3>Group Progress</h3>
-      <select id="group-selector"><option value="">Select a Group...</option></select>
-      <button class="list-btn" onclick="openContext('group', document.getElementById('group-selector').value)" style="justify-content: center;">View Group</button>
-    </div>
-    <div class="dashboard-section">
-      <h3>Individual Progress</h3>
-      <select id="student-selector"><option value="">Select a Student...</option></select>
-      <button class="list-btn" onclick="openContext('student', document.getElementById('student-selector').value)" style="justify-content: center;">View Student</button>
-    </div>
-  </div>
-
-  <!-- 4. ATTENDANCE DASHBOARD -->
-  <div id="attendance-dashboard" class="view">
-    <div class="nav-header">
-      <h2 class="nav-title">Attendance</h2>
-      <button class="back-btn" onclick="showScreen('main-menu-screen')">Back</button>
-    </div>
-    <div class="button-grid" style="grid-template-columns: 1fr; gap: 10px;">
-      <button class="list-btn" onclick="openMarkRegister()" style="justify-content: center;">📝 Mark Register</button>
-      <button class="list-btn" onclick="openViewAttendance()" style="justify-content: center;">🔍 View Records</button>
-      <button class="list-btn" onclick="openAttendanceStats()" style="justify-content: center;">📈 Attendance Stats</button>
-    </div>
-  </div>
-
-  <!-- 5. DYNAMIC VIEWS -->
-  <div id="categories-screen" class="view"></div>
-  <div id="tasks-screen" class="view"></div>
-  <div id="action-screen" class="view"></div>
-  <div id="attendance-action-screen" class="view"></div>
-
-  <!-- CORE SCREEN NAVIGATION SCRIPT -->
-  <script>
-    // Universal screen switcher function
+    // Helper: Screen Switcher
     function showScreen(screenId) {
       document.querySelectorAll('.view').forEach(screen => {
         screen.classList.remove('active');
       });
-      
       const targetScreen = document.getElementById(screenId);
       if (targetScreen) {
         targetScreen.classList.add('active');
-      } else {
-        console.error("Screen ID container not found: " + screenId);
       }
     }
-// Helper: Get first and last day of current month in YYYY-MM-DD
-    function getDefaultDateRange() {
-      const now = new Date();
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      return {
-        start: firstDay.toISOString().split('T')[0],
-        end: now.toISOString().split('T')[0]
-      };
-    }
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTSI8edGh-riqutqrOci9d66hKos8a7kcB7VDw6FsUhZw91C4IvHOlKvR47Vr_DHqK/exec";
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlToken = urlParams.get('token'); 
-
-    // Global State
-    let adminPin = "";
-        let allAttendance = []; // Store fetched attendance records
-let allStudents = [];
-    let attendanceState = {}; // Keeps track of who is present/absent
-    let allTasks = [];
-    let studentsMap = {};
-    let currentContext = { type: null, value: null }; // type: 'class', 'group', 'student'
-    let currentCategory = null;
-    let currentTask = null;
-    let pendingUpdates = {}; 
 
     function apiCall(payload) {
       return fetch(SCRIPT_URL, {
@@ -492,11 +166,6 @@ let allStudents = [];
         }).catch(() => {});
     };
 
-    function showScreen(screenId) {
-      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-      document.getElementById(screenId).style.display = 'block';
-    }
-
     function verifyAdminLogin() {
       const pin = document.getElementById('adminPin').value;
       document.getElementById('error-message').innerHTML = `<h4>Loading data....</h4>`;
@@ -512,17 +181,18 @@ let allStudents = [];
       });
     }
 
-   function fetchDashboardData() {
+    function fetchDashboardData() {
        apiCall({ action: 'getAdminDashboardData' }).then(data => {
            if (data.success) {
                allTasks = data.tasks;
                allStudents = data.students; 
                
-               // Populate Dropdowns (same as your current code)
+               // Populate Group Dropdown
                const grpSelect = document.getElementById('group-selector');
                grpSelect.innerHTML = '<option value="">Select a Group...</option>';
                data.groups.forEach(g => grpSelect.innerHTML += `<option value="${g}">Group ${g}</option>`);
                
+               // Populate Student Dropdown 
                const stuSelect = document.getElementById('student-selector');
                stuSelect.innerHTML = '<option value="">Select a Student...</option>';
                const studentsByGroup = {};
@@ -546,9 +216,9 @@ let allStudents = [];
                // Show Main Menu instead of Progress directly
                showScreen('main-menu-screen');
                
-               // Silently fetch attendance data in background so it's ready
+               // Silently fetch attendance data in background
                apiCall({ action: 'getAttendanceData' }).then(attData => {
-                 if(attData.success) allAttendance = attData.records;
+                 if(attData && attData.success) allAttendance = attData.records;
                });
 
            } else {
@@ -557,11 +227,14 @@ let allStudents = [];
        });
     }
 
-    // --- MATH & FILTERING CORE ---
+    // ==========================================
+    // PROGRESS FUNCTIONS
+    // ==========================================
+
     function getFilteredTasks() {
       if (currentContext.type === 'group') return allTasks.filter(t => t.group === currentContext.value);
       if (currentContext.type === 'student') return allTasks.filter(t => t.pin === currentContext.value);
-      return allTasks; // Class
+      return allTasks; 
     }
 
     function calcVerification(tasksArray) {
@@ -570,7 +243,6 @@ let allStudents = [];
       return Math.round((verified / tasksArray.length) * 100);
     }
 
-    // --- NAVIGATION FLOW ---
     function openContext(type, value) {
       if ((type === 'group' || type === 'student') && !value) return alert("Please select an option.");
       currentContext = { type, value };
@@ -587,307 +259,7 @@ let allStudents = [];
 
       let html = `<div class="nav-header">
                     <h2 class="nav-title">${title}</h2>
-                    <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Maktab Admin Portal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="preconnect" href="https://googleapis.com">
-  <link rel="preconnect" href="https://gstatic.com" crossorigin>
-  <link href="https://cdnfonts.com" rel="stylesheet">
-
-  <style>
-    body { background-color: silver; color: teal; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    h1, h2, h3, h4 { color: teal; font-family: 'GAGALIN', cursive; letter-spacing: 1px; font-weight: normal; margin-top: 0;}
-    
-    /* SYSTEM WORKHORSE: Screens are hidden by default */
-    .view { 
-      display: none !important; 
-    }
-    
-    /* Only show the screen when it contains the active class */
-    .view.active { 
-      display: block !important; 
-      background-color: silver; 
-      padding: 20px; 
-      border-radius: 10px; 
-      box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); 
-      text-align: center; 
-      width: 100%; 
-      max-width: 600px; 
-    }
-    
-    /* Login screen specific width constraint */
-    #login-screen.active { 
-      max-width: 400px; 
-    }    
-    
-    .app-logo { 
-      width: 35vw;             
-      max-width: 140px;        
-      aspect-ratio: 1 / 1;     
-      object-fit: cover;       
-      border-radius: 50%;      
-      background-color: transparent; 
-      margin-bottom: 15px; 
-    }
-    
-    input, select { 
-      padding: 12px; 
-      margin: 10px 0 20px 0; 
-      border-radius: 5px; 
-      border: 1px solid teal; 
-      width: 85%; 
-      font-size: 1rem; 
-      color: teal; 
-    }
-    
-    button { background-color: teal; color: WhiteSmoke; border: 3px solid teal; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
-    button:active { background-color: teal; color: WhiteSmoke; transform: scale(0.95); }
-
-    .quote-box { margin-top: 30px; margin-bottom: 20px; font-size: 1rem; font-weight: normal; color: WhiteSmoke; line-height: 1.4; padding: 20px 10px; min-height: 40px; border: 1px dashed teal; border-radius: 12px; }
-
-    /* Dashboard UI Elements */
-    .dashboard-section { background-color: WhiteSmoke; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px solid rgba(0,128,128, 0.2); }
-    .list-btn { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; text-align: left; }
-    .indicator { background: rgba(0,128,128,0.1); padding: 5px 10px; border-radius: 10px; font-size: 0.9rem; font-family: sans-serif; color: teal;}
-    .nav-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid teal; padding-bottom: 10px; }
-    .nav-title { font-size: 1.3rem; margin: 0; }
-    .back-btn { background-color: teal; color: WhiteSmoke; font-size: 0.9rem; padding: 5px 10px; margin: 0; }
-
-    /* Layout Grids */
-    .button-grid { display: grid; }
-
-    /* Toggle UI for Students/Tasks */
-    .action-row { border-bottom: 1px solid #eee; padding: 15px 0; text-align: left; display: flex; flex-direction: column; }
-    .action-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; color: teal; }
-    .toggle-container { display: flex; justify-content: space-around; background: WhiteSmoke; padding: 10px; border-radius: 8px; }
-    .toggle-item { cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 45%; }
-    .tick-green { color: teal; font-weight: bold; font-size: 1.5rem; }
-    .tick-gold { color: goldenrod; font-weight: bold; font-size: 1.5rem; }
-    .text-grey { color: grey; font-size: 0.8rem; font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px;}
-    
-    #save-bar { position: sticky; bottom: 0; background: #424242; padding: 15px; border-top: 2px solid teal; margin-top: 20px; border-radius: 0 0 10px 10px;}
-    .save-btn { background-color: teal; color: #424242; border-color: teal; width: 100%; }
-  </style>
-</head>
-<body>
-
-  <!-- 1. LOGIN SCREEN (Visible on load) -->
-  <div id="login-screen" class="view active">
-    <img src="logo.png" alt="Maktab Logo" class="app-logo">
-    <h2>ADMIN PORTAL</h2>
-    <input type="password" id="adminPin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="Enter 4-Digit PIN">
-    <button onclick="verifyAdminLogin()">Log In to Dashboard</button>
-    <div id="quote-box" class="quote-box">>......</div>
-    <p id="error-message" style="color: red; font-weight: bold;"></p>
-  </div>
-
-  <!-- 2. MAIN DASHBOARD MENU -->
-  <div id="main-menu-screen" class="view">
-    <div id="welcome-message"></div>
-    <h2>Admin Dashboard</h2>
-    <div class="button-grid" style="grid-template-columns: 1fr; gap: 15px;">
-      <button class="list-btn" onclick="showScreen('progress-dashboard')" style="justify-content: center; padding: 15px;">📊 Manage Progress</button>
-      <button class="list-btn" onclick="showScreen('attendance-dashboard')" style="justify-content: center; padding: 15px;">📋 Manage Attendance</button>
-      <button class="list-btn" onclick="alert('Student Records coming soon!')" style="justify-content: center; padding: 15px; background: #eee; color: #999; border-color: #ccc;">📁 Student Records</button>
-    </div>
-    <button onclick="location.reload()" style="background: darkred; color: white; border-color: maroon; margin-top: 30px; width: 100%;">Log Out</button>
-  </div>
-
-  <!-- 3. PROGRESS DASHBOARD -->
-  <div id="progress-dashboard" class="view">
-    <div class="nav-header">
-      <h2 class="nav-title">Progress</h2>
-      <button class="back-btn" onclick="showScreen('main-menu-screen')">Back</button>
-    </div>
-    <div class="dashboard-section">
-      <h3>Class Progress</h3>
-      <button class="list-btn" onclick="openContext('class', null)" style="justify-content: center;">View Full Class</button>
-    </div>
-    <div class="dashboard-section">
-      <h3>Group Progress</h3>
-      <select id="group-selector"><option value="">Select a Group...</option></select>
-      <button class="list-btn" onclick="openContext('group', document.getElementById('group-selector').value)" style="justify-content: center;">View Group</button>
-    </div>
-    <div class="dashboard-section">
-      <h3>Individual Progress</h3>
-      <select id="student-selector"><option value="">Select a Student...</option></select>
-      <button class="list-btn" onclick="openContext('student', document.getElementById('student-selector').value)" style="justify-content: center;">View Student</button>
-    </div>
-  </div>
-
-  <!-- 4. ATTENDANCE DASHBOARD -->
-  <div id="attendance-dashboard" class="view">
-    <div class="nav-header">
-      <h2 class="nav-title">Attendance</h2>
-      <button class="back-btn" onclick="showScreen('main-menu-screen')">Back</button>
-    </div>
-    <div class="button-grid" style="grid-template-columns: 1fr; gap: 10px;">
-      <button class="list-btn" onclick="openMarkRegister()" style="justify-content: center;">📝 Mark Register</button>
-      <button class="list-btn" onclick="openViewAttendance()" style="justify-content: center;">🔍 View Records</button>
-      <button class="list-btn" onclick="openAttendanceStats()" style="justify-content: center;">📈 Attendance Stats</button>
-    </div>
-  </div>
-
-  <!-- 5. DYNAMIC VIEWS -->
-  <div id="categories-screen" class="view"></div>
-  <div id="tasks-screen" class="view"></div>
-  <div id="action-screen" class="view"></div>
-  <div id="attendance-action-screen" class="view"></div>
-
-  <!-- CORE SCREEN NAVIGATION SCRIPT -->
-  <script>
-    // Universal screen switcher function
-    function showScreen(screenId) {
-      document.querySelectorAll('.view').forEach(screen => {
-        screen.classList.remove('active');
-      });
-      
-      const targetScreen = document.getElementById(screenId);
-      if (targetScreen) {
-        targetScreen.classList.add('active');
-      } else {
-        console.error("Screen ID container not found: " + screenId);
-      }
-    }
-// Helper: Get first and last day of current month in YYYY-MM-DD
-    function getDefaultDateRange() {
-      const now = new Date();
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-      return {
-        start: firstDay.toISOString().split('T')[0],
-        end: now.toISOString().split('T')[0]
-      };
-    }
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTSI8edGh-riqutqrOci9d66hKos8a7kcB7VDw6FsUhZw91C4IvHOlKvR47Vr_DHqK/exec";
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlToken = urlParams.get('token'); 
-
-    // Global State
-    let adminPin = "";
-        let allAttendance = []; // Store fetched attendance records
-let allStudents = [];
-    let attendanceState = {}; // Keeps track of who is present/absent
-    let allTasks = [];
-    let studentsMap = {};
-    let currentContext = { type: null, value: null }; // type: 'class', 'group', 'student'
-    let currentCategory = null;
-    let currentTask = null;
-    let pendingUpdates = {}; 
-
-    function apiCall(payload) {
-      return fetch(SCRIPT_URL, {
-        method: 'POST', redirect: 'follow', 
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      }).then(r => r.json());
-    }
-
-    // Initialization
-    window.onload = function() {
-        apiCall({ action: 'getQuote' }).then(data => {
-            document.getElementById('quote-box').innerText = (data && data.success && data.quote) ? `"${data.quote}"` : '"Messenger of Allah (ﷺ) said: Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him"';
-        }).catch(() => {});
-    };
-
-    function showScreen(screenId) {
-      document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-      document.getElementById(screenId).style.display = 'block';
-    }
-
-    function verifyAdminLogin() {
-      const pin = document.getElementById('adminPin').value;
-      document.getElementById('error-message').innerHTML = `<h4>Loading data....</h4>`;
-      
-      apiCall({ action: 'adminLogin', pin: pin, token: urlToken }).then(data => {
-        if (data.success) {
-          adminPin = pin;
-          document.getElementById('welcome-message').innerHTML = `<h1>Muallimah ${data.adminData.name}</h1><h2 style="margin-bottom: 5px">** Ahlan wa sahlan **</h2>`;
-          fetchDashboardData();
-        } else {
-           document.getElementById('error-message').innerText = data.message || "Invalid Token or PIN.";
-        }
-      });
-    }
-
-   function fetchDashboardData() {
-       apiCall({ action: 'getAdminDashboardData' }).then(data => {
-           if (data.success) {
-               allTasks = data.tasks;
-               allStudents = data.students; 
-               
-               // Populate Dropdowns (same as your current code)
-               const grpSelect = document.getElementById('group-selector');
-               grpSelect.innerHTML = '<option value="">Select a Group...</option>';
-               data.groups.forEach(g => grpSelect.innerHTML += `<option value="${g}">Group ${g}</option>`);
-               
-               const stuSelect = document.getElementById('student-selector');
-               stuSelect.innerHTML = '<option value="">Select a Student...</option>';
-               const studentsByGroup = {};
-               data.students.forEach(s => {
-                 studentsMap[s.pin] = s.name;
-                 if (!studentsByGroup[s.group]) studentsByGroup[s.group] = [];
-                 studentsByGroup[s.group].push(s);
-               });
-               Object.keys(studentsByGroup).sort().forEach(group => {
-                 let optgroup = document.createElement('optgroup');
-                 optgroup.label = `Group ${group}`;
-                 studentsByGroup[group].sort((a, b) => a.name.localeCompare(b.name)).forEach(s => {
-                   let opt = document.createElement('option');
-                   opt.value = s.pin;
-                   opt.innerText = s.name;
-                   optgroup.appendChild(opt);
-                 });
-                 stuSelect.appendChild(optgroup);
-               });
-
-               // Show Main Menu instead of Progress directly
-               showScreen('main-menu-screen');
-               
-               // Silently fetch attendance data in background so it's ready
-               apiCall({ action: 'getAttendanceData' }).then(attData => {
-                 if(attData.success) allAttendance = attData.records;
-               });
-
-           } else {
-               document.getElementById('error-message').innerText = "Data failed to load.";
-           }
-       });
-    }
-
-    // --- MATH & FILTERING CORE ---
-    function getFilteredTasks() {
-      if (currentContext.type === 'group') return allTasks.filter(t => t.group === currentContext.value);
-      if (currentContext.type === 'student') return allTasks.filter(t => t.pin === currentContext.value);
-      return allTasks; // Class
-    }
-
-    function calcVerification(tasksArray) {
-      if (tasksArray.length === 0) return 0;
-      const verified = tasksArray.filter(t => t.verification === 'Verified').length;
-      return Math.round((verified / tasksArray.length) * 100);
-    }
-
-    // --- NAVIGATION FLOW ---
-    function openContext(type, value) {
-      if ((type === 'group' || type === 'student') && !value) return alert("Please select an option.");
-      currentContext = { type, value };
-      renderCategoriesScreen();
-    }
-
-    function renderCategoriesScreen() {
-      const targetTasks = getFilteredTasks();
-      const categories = [...new Set(targetTasks.map(t => t.category))];
-      
-      let title = currentContext.type === 'class' ? "Class Categories" : 
-                  currentContext.type === 'group' ? `Group ${currentContext.value} Categories` :
-                  `${studentsMap[currentContext.value]}'s Categories`;
-
-      let html = `<div class="nav-header">
-                    <h2 class="nav-title">${title}</h2>
-                   <button class="back-btn" onclick="showScreen('progress-dashboard')">Back</button>
+                    <button class="back-btn" onclick="showScreen('progress-dashboard')">Back</button>
                   </div>`;
 
       categories.forEach(cat => {
@@ -904,7 +276,6 @@ let allStudents = [];
 
     function openCategory(category) {
       currentCategory = category;
-      // If we are looking at a specific student, skip the Task list and go straight to their actions
       if (currentContext.type === 'student') {
         renderActionScreen();
       } else {
@@ -938,30 +309,22 @@ let allStudents = [];
       renderActionScreen();
     }
 
-    // --- ACTION LIST RENDERING ---
-
-      function renderActionScreen() {
+    function renderActionScreen() {
       let activeTasks = [];
       let title = "";
       let backTarget = "";
 
       if (currentContext.type === 'student') {
-        // Individual path: Show all tasks for the selected category
         activeTasks = getFilteredTasks().filter(t => t.category === currentCategory);
         title = `${studentsMap[currentContext.value]}: ${currentCategory}`;
         backTarget = "showScreen('categories-screen')";
       } else {
-        // Class/Group path: Show all students for the selected task
         activeTasks = getFilteredTasks().filter(t => t.category === currentCategory && t.task === currentTask);
         title = `Task: ${currentTask}`;
         backTarget = "showScreen('tasks-screen')";
         
-        // SORTING: Group first, then Alphabetically by Name
         activeTasks.sort((a, b) => {
-            if (a.group === b.group) {
-                return a.name.localeCompare(b.name);
-            }
-            // Use numeric sorting for groups if possible, otherwise string sort
+            if (a.group === b.group) return a.name.localeCompare(b.name);
             return a.group.localeCompare(b.group, undefined, {numeric: true});
         });
       }
@@ -974,35 +337,32 @@ let allStudents = [];
       let currentGroupHeader = "";
 
       activeTasks.forEach(t => {
-        // Overlay any pending changes that haven't been saved to DB yet
         const displayStatus = pendingUpdates[t.rowId]?.status || t.status;
         const displayVerif = pendingUpdates[t.rowId]?.verification || t.verification;
         
-        // Inject Group Headers for Class/Group views
         if (currentContext.type !== 'student') {
             if (t.group !== currentGroupHeader) {
                 currentGroupHeader = t.group;
                 html += `
-                  <div style="background-color: teal; color: #424242; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">
+                  <div style="background-color: teal; color: white; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">
                     GROUP ${t.group}
                   </div>`;
             }
         }
-const labelText = currentContext.type === 'student' 
-  ? t.task 
-  : `<span style="color: WhiteSmoke; font-weight: normal; font-size: 1rem;">${t.name}</span>`;
+        
+        const labelText = currentContext.type === 'student' 
+          ? t.task 
+          : `<span style="color: grey; font-weight: normal; font-size: 1rem;">${t.name}</span>`;
 
         html += `
           <div class="action-row">
             <div class="action-title">${labelText}</div>
             <div class="toggle-container">
               <div class="toggle-item" onclick="toggleLocalStatus(${t.rowId})">
-
-    
-                ${displayStatus === 'Completed' ? '<span class="tick-green">✓</span>' : '<span class="text-grey">To be completed</span>'}
+                ${displayStatus === 'Completed' ? '<span class="tick-green">✓&#xFE0E;</span>' : '<span class="text-grey">To be completed</span>'}
               </div>
               <div class="toggle-item" onclick="toggleLocalVerif(${t.rowId})">
-                ${displayVerif === 'Verified' ? '<span class="tick-gold">✓</span>' : '<span class="text-grey">To be verified</span>'}
+                ${displayVerif === 'Verified' ? '<span class="tick-gold">✓&#xFE0E;</span>' : '<span class="text-grey">To be verified</span>'}
               </div>
             </div>
           </div>`;
@@ -1015,14 +375,10 @@ const labelText = currentContext.type === 'student'
       document.getElementById('action-screen').innerHTML = html;
       showScreen('action-screen');
     }
-    
-        
 
-    // --- TOGGLE LOGIC ---
     function toggleLocalStatus(rowId) {
       const originalTask = allTasks.find(t => t.rowId === rowId);
       if (!pendingUpdates[rowId]) pendingUpdates[rowId] = { status: originalTask.status, verification: originalTask.verification, rowId: rowId };
-      
       pendingUpdates[rowId].status = pendingUpdates[rowId].status === 'Completed' ? 'To be completed' : 'Completed';
       renderActionScreen();
     }
@@ -1030,25 +386,18 @@ const labelText = currentContext.type === 'student'
     function toggleLocalVerif(rowId) {
       const originalTask = allTasks.find(t => t.rowId === rowId);
       if (!pendingUpdates[rowId]) pendingUpdates[rowId] = { status: originalTask.status, verification: originalTask.verification, rowId: rowId };
-      
       pendingUpdates[rowId].verification = pendingUpdates[rowId].verification === 'Verified' ? 'Unverified' : 'Verified';
-      
-      // Auto-complete status if they mark it verified
       if (pendingUpdates[rowId].verification === 'Verified') pendingUpdates[rowId].status = 'Completed';
-      
       renderActionScreen();
     }
 
-    // --- SAVE LOGIC ---
     function saveBatchUpdates() {
       const changesArr = Object.values(pendingUpdates);
       if (changesArr.length === 0) return;
-
       document.querySelector('.save-btn').innerText = "Saving...";
       
       apiCall({ action: 'adminUpdateTasks', changes: changesArr }).then(res => {
          if (res.success) {
-            // Apply changes locally to avoid needing to refresh all data
             changesArr.forEach(c => {
                const taskIndex = allTasks.findIndex(t => t.rowId === c.rowId);
                if (taskIndex > -1) {
@@ -1056,8 +405,8 @@ const labelText = currentContext.type === 'student'
                   allTasks[taskIndex].verification = c.verification;
                }
             });
-            pendingUpdates = {}; // Clear queue
-            renderActionScreen(); // Re-render without the save bar
+            pendingUpdates = {}; 
+            renderActionScreen(); 
             alert("Changes saved successfully!");
          } else {
             alert("Save failed. Please try again.");
@@ -1065,12 +414,14 @@ const labelText = currentContext.type === 'student'
          }
       });
     }
+
     // ==========================================
     // ATTENDANCE FUNCTIONS
     // ==========================================
 
+    function openMarkRegister() { openAttendance(); }
+
     function openAttendance() {
-      // Default everyone to 'Present' when opening the screen
       attendanceState = {};
       allStudents.forEach(s => {
          attendanceState[s.pin] = 'Present';
@@ -1079,653 +430,14 @@ const labelText = currentContext.type === 'student'
     }
 
     function renderAttendanceScreen() {
-      // Get today's date in YYYY-MM-DD format for the date picker
       const today = new Date().toISOString().split('T')[0];
       
       let html = `<div class="nav-header">
                     <h2 class="nav-title">Attendance</h2>
                     <button class="back-btn" onclick="showScreen('attendance-dashboard')">Back</button>
                   </div>
-                  <input type="date" id="attendance-date" value="${today}" style="width: 90%; margin-bottom: 15px; font-family: sans-serif; text-align: center;">`
-
-      
-      let currentGroupHeader = "";
-
-      // Sort students by Group, then Alphabetically by Name
-      let sortedStudents = [...allStudents].sort((a, b) => {
-          if (a.group === b.group) return a.name.localeCompare(b.name);
-          return a.group.localeCompare(b.group, undefined, {numeric: true});
-      });
-
-      sortedStudents.forEach(s => {
-          // Inject Group Headers
-          if (s.group !== currentGroupHeader) {
-              currentGroupHeader = s.group;
-              html += `<div style="background-color: teal; color: white; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">GROUP ${s.group}</div>`;
-          }
-
-          const isPresent = attendanceState[s.pin] === 'Present';
-
-          // Render Row with Toggle Button
-          html += `
-          <div class="action-row" style="flex-direction: row; justify-content: space-between; align-items: center;">
-            <div class="action-title" style="margin-bottom: 0;">${s.name}</div>
-            <div onclick="toggleAttendance('${s.pin}')" style="cursor: pointer; padding: 6px 15px; border-radius: 5px; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; ${isPresent ? 'background-color: #e8f5e9; color: forestgreen; border: 1px solid forestgreen;' : 'background-color: #ffebee; color: crimson; border: 1px solid crimson;'}">
-              ${isPresent ? 'PRESENT ✔&#xFE0E;' : 'ABSENT ✘&#xFE0E;'}
-            </div>
-          </div>`;
-      });
-
-      html += `<div id="save-bar"><button class="save-btn" onclick="submitAttendance()">Save Attendance</button></div>`;
-
-    // 2. Change the bottom two lines of the function to target the right screen:
-        document.getElementById('attendance-action-screen').innerHTML = html;
-        showScreen('attendance-action-screen');
-
-    }
-
-    function toggleAttendance(pin) {
-      // Flip the state and re-render
-      attendanceState[pin] = attendanceState[pin] === 'Present' ? 'Absent' : 'Present';
-      renderAttendanceScreen();
-    }
-
-    function submitAttendance() {
-      const dateVal = document.getElementById('attendance-date').value;
-      if (!dateVal) return alert("Please select a date.");
-
-      // Gather only the absentees for the backend
-      const absentees = [];
-      allStudents.forEach(s => {
-         if (attendanceState[s.pin] === 'Absent') {
-             // Backend uses whatsappnum field, we pass the PIN so it logs correctly
-             absentees.push({ name: s.name, whatsappnum: s.pin }); 
-         }
-      });
-
-      // Update UI while saving
-      document.querySelector('#attendance-screen .save-btn').innerText = "Saving to Database...";
-
-      apiCall({
-        action: 'markAttendance',
-        date: dateVal,
-        absentees: absentees
-      }).then(res => {
-         if (res.success) {
-             alert("Attendance saved successfully!");
-             showScreen('attendance-dashboard'); // Go back to attendance menu
-         } else {
-             alert("Failed to save attendance: " + res.message);
-             document.querySelector('#attendance-screen .save-btn').innerText = "Save Attendance";
-         }
-      }).catch(err => {
-         alert("Network Error. Please try again.");
-         document.querySelector('#attendance-screen .save-btn').innerText = "Save Attendance";
-      });
-    }
-  
-    function openContext(type, val) { console.log(`Opening context: ${type} with value: ${val}`); }
-    function openMarkRegister() { openAttendance(); }
-    function openViewAttendance() { console.log('Viewing Attendance Records'); }
-    function openAttendanceStats() { console.log('Viewing Attendance Stats'); }
-  </script>
-</body>
-</html>
-                  </div>`;
-
-      categories.forEach(cat => {
-        const catTasks = targetTasks.filter(t => t.category === cat);
-        const percent = calcVerification(catTasks);
-        html += `<button class="list-btn" onclick="openCategory('${cat}')">
-                   ${cat} <span class="indicator">${percent}% Verified</span>
-                 </button>`;
-      });
-
-      document.getElementById('categories-screen').innerHTML = html;
-      showScreen('categories-screen');
-    }
-
-    function openCategory(category) {
-      currentCategory = category;
-      // If we are looking at a specific student, skip the Task list and go straight to their actions
-      if (currentContext.type === 'student') {
-        renderActionScreen();
-      } else {
-        renderTasksScreen();
-      }
-    }
-
-    function renderTasksScreen() {
-      const targetTasks = getFilteredTasks().filter(t => t.category === currentCategory);
-      const tasks = [...new Set(targetTasks.map(t => t.task))];
-      
-      let html = `<div class="nav-header">
-                    <h2 class="nav-title">${currentCategory}</h2>
-                    <button class="back-btn" onclick="showScreen('categories-screen')">Back</button>
-                  </div>`;
-
-      tasks.forEach(task => {
-        const specificTasks = targetTasks.filter(t => t.task === task);
-        const percent = calcVerification(specificTasks);
-        html += `<button class="list-btn" onclick="openTask('${task}')">
-                   ${task} <span class="indicator">${percent}% Verified</span>
-                 </button>`;
-      });
-
-      document.getElementById('tasks-screen').innerHTML = html;
-      showScreen('tasks-screen');
-    }
-
-    function openTask(task) {
-      currentTask = task;
-      renderActionScreen();
-    }
-
-    // --- ACTION LIST RENDERING ---
-
-      function renderActionScreen() {
-      let activeTasks = [];
-      let title = "";
-      let backTarget = "";
-
-      if (currentContext.type === 'student') {
-        // Individual path: Show all tasks for the selected category
-        activeTasks = getFilteredTasks().filter(t => t.category === currentCategory);
-        title = `${studentsMap[currentContext.value]}: ${currentCategory}`;
-        backTarget = "showScreen('categories-screen')";
-      } else {
-        // Class/Group path: Show all students for the selected task
-        activeTasks = getFilteredTasks().filter(t => t.category === currentCategory && t.task === currentTask);
-        title = `Task: ${currentTask}`;
-        backTarget = "showScreen('tasks-screen')";
-        
-        // SORTING: Group first, then Alphabetically by Name
-        activeTasks.sort((a, b) => {
-            if (a.group === b.group) {
-                return a.name.localeCompare(b.name);
-            }
-            // Use numeric sorting for groups if possible, otherwise string sort
-            return a.group.localeCompare(b.group, undefined, {numeric: true});
-        });
-      }
-
-      let html = `<div class="nav-header">
-                    <h2 class="nav-title">${title}</h2>
-                    <button class="back-btn" onclick="${backTarget}">Back</button>
-                  </div>`;
-
-      let currentGroupHeader = "";
-
-      activeTasks.forEach(t => {
-        // Overlay any pending changes that haven't been saved to DB yet
-        const displayStatus = pendingUpdates[t.rowId]?.status || t.status;
-        const displayVerif = pendingUpdates[t.rowId]?.verification || t.verification;
-        
-        // Inject Group Headers for Class/Group views
-        if (currentContext.type !== 'student') {
-            if (t.group !== currentGroupHeader) {
-                currentGroupHeader = t.group;
-                html += `
-                  <div style="background-color: teal; color: #424242; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">
-                    GROUP ${t.group}
-                  </div>`;
-            }
-        }
-const labelText = currentContext.type === 'student' 
-  ? t.task 
-  : `<span style="color: WhiteSmoke; font-weight: normal; font-size: 1rem;">${t.name}</span>`;
-
-        html += `
-          <div class="action-row">
-            <div class="action-title">${labelText}</div>
-            <div class="toggle-container">
-              <div class="toggle-item" onclick="toggleLocalStatus(${t.rowId})">
-
-    
-                ${displayStatus === 'Completed' ? '<span class="tick-green">✓</span>' : '<span class="text-grey">To be completed</span>'}
-              </div>
-              <div class="toggle-item" onclick="toggleLocalVerif(${t.rowId})">
-                ${displayVerif === 'Verified' ? '<span class="tick-gold">✓</span>' : '<span class="text-grey">To be verified</span>'}
-              </div>
-            </div>
-          </div>`;
-      });
-
-      if (Object.keys(pendingUpdates).length > 0) {
-         html += `<div id="save-bar"><button class="save-btn" onclick="saveBatchUpdates()">Save Changes</button></div>`;
-      }
-
-      document.getElementById('action-screen').innerHTML = html;
-      showScreen('action-screen');
-    }
-    
-        
-
-    // --- TOGGLE LOGIC ---
-    function toggleLocalStatus(rowId) {
-      const originalTask = allTasks.find(t => t.rowId === rowId);
-      if (!pendingUpdates[rowId]) pendingUpdates[rowId] = { status: originalTask.status, verification: originalTask.verification, rowId: rowId };
-      
-      pendingUpdates[rowId].status = pendingUpdates[rowId].status === 'Completed' ? 'To be completed' : 'Completed';
-      renderActionScreen();
-    }
-
-    function toggleLocalVerif(rowId) {
-      const originalTask = allTasks.find(t => t.rowId === rowId);
-      if (!pendingUpdates[rowId]) pendingUpdates[rowId] = { status: originalTask.status, verification: originalTask.verification, rowId: rowId };
-      
-      pendingUpdates[rowId].verification = pendingUpdates[rowId].verification === 'Verified' ? 'Unverified' : 'Verified';
-      
-      // Auto-complete status if they mark it verified
-      if (pendingUpdates[rowId].verification === 'Verified') pendingUpdates[rowId].status = 'Completed';
-      
-      renderActionScreen();
-    }
-
-    // --- SAVE LOGIC ---
-    function saveBatchUpdates() {
-      const changesArr = Object.values(pendingUpdates);
-      if (changesArr.length === 0) return;
-
-      document.querySelector('.save-btn').innerText = "Saving...";
-      
-      apiCall({ action: 'adminUpdateTasks', changes: changesArr }).then(res => {
-         if (res.success) {
-            // Apply changes locally to avoid needing to refresh all data
-            changesArr.forEach(c => {
-               const taskIndex = allTasks.findIndex(t => t.rowId === c.rowId);
-               if (taskIndex > -1) {
-                  allTasks[taskIndex].status = c.status;
-                  allTasks[taskIndex].verification = c.verification;
-               }
-            });
-            pendingUpdates = {}; // Clear queue
-            renderActionScreen(); // Re-render without the save bar
-            alert("Changes saved successfully!");
-         } else {
-            alert("Save failed. Please try again.");
-            document.querySelector('.save-btn').innerText = "Save Changes";
-         }
-      });
-    }
-    // ==========================================
-    // ATTENDANCE FUNCTIONS
-    // ==========================================
-
-    function openAttendance() {
-      // Default everyone to 'Present' when opening the screen
-      attendanceState = {};
-      allStudents.forEach(s => {
-         attendanceState[s.pin] = 'Present';
-      });
-      renderAttendanceScreen();
-    }
-
-    function renderAttendanceScreen() {
-      // Get today's date in YYYY-MM-DD format for the date picker
-      const today = new Date().toISOString().split('T')[0];
-      
-      let html = `<div class="nav-header">
-                    <h2 class="nav-title">Attendance</h2>
-                    <button class="back-btn" onclick="showScreen('admin-dashboard')">Back</button>
-                  </div>
                   <input type="date" id="attendance-date" value="${today}" style="width: 90%; margin-bottom: 15px; font-family: sans-serif; text-align: center;">`;
 
       let currentGroupHeader = "";
-
-      // Sort students by Group, then Alphabetically by Name
       let sortedStudents = [...allStudents].sort((a, b) => {
-          if (a.group === b.group) return a.name.localeCompare(b.name);
-          return a.group.localeCompare(b.group, undefined, {numeric: true});
-      });
-
-      sortedStudents.forEach(s => {
-          // Inject Group Headers
-          if (s.group !== currentGroupHeader) {
-              currentGroupHeader = s.group;
-              html += `<div style="background-color: teal; color: white; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">GROUP ${s.group}</div>`;
-          }
-
-          const isPresent = attendanceState[s.pin] === 'Present';
-
-          // Render Row with Toggle Button
-          html += `
-          <div class="action-row" style="flex-direction: row; justify-content: space-between; align-items: center;">
-            <div class="action-title" style="margin-bottom: 0;">${s.name}</div>
-            <div onclick="toggleAttendance('${s.pin}')" style="cursor: pointer; padding: 6px 15px; border-radius: 5px; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; ${isPresent ? 'background-color: #e8f5e9; color: forestgreen; border: 1px solid forestgreen;' : 'background-color: #ffebee; color: crimson; border: 1px solid crimson;'}">
-              ${isPresent ? 'PRESENT ✔&#xFE0E;' : 'ABSENT ✘&#xFE0E;'}
-            </div>
-          </div>`;
-      });
-
-      html += `<div id="save-bar"><button class="save-btn" onclick="submitAttendance()">Save Attendance</button></div>`;
-
-      document.getElementById('attendance-screen').innerHTML = html;
-      showScreen('attendance-screen');
-    }
-
-    function toggleAttendance(pin) {
-      // Flip the state and re-render
-      attendanceState[pin] = attendanceState[pin] === 'Present' ? 'Absent' : 'Present';
-      renderAttendanceScreen();
-    }
-
-    function submitAttendance() {
-      const dateVal = document.getElementById('attendance-date').value;
-      if (!dateVal) return alert("Please select a date.");
-
-      // Gather only the absentees for the backend
-      const absentees = [];
-      allStudents.forEach(s => {
-         if (attendanceState[s.pin] === 'Absent') {
-             // Backend uses whatsappnum field, we pass the PIN so it logs correctly
-             absentees.push({ name: s.name, whatsappnum: s.pin }); 
-         }
-      });
-
-      // Update UI while saving
-      document.querySelector('#attendance-screen .save-btn').innerText = "Saving to Database...";
-
-      apiCall({
-        action: 'markAttendance',
-        date: dateVal,
-        absentees: absentees
-      }).then(res => {
-         if (res.success) {
-             alert("Attendance saved successfully!");
-             showScreen('admin-dashboard'); // Go back to dashboard
-         } else {
-             alert("Failed to save attendance: " + res.message);
-             document.querySelector('#attendance-screen .save-btn').innerText = "Save Attendance";
-         }
-      }).catch(err => {
-         alert("Network Error. Please try again.");
-         document.querySelector('#attendance-screen .save-btn').innerText = "Save Attendance";
-      });
-    }
-  
-    function openContext(type, val) { console.log(`Opening context: ${type} with value: ${val}`); }
-    function openMarkRegister() { showScreen('attendance-action-screen'); }
-    function openViewAttendance() { console.log('Viewing Attendance Records'); }
-    function openAttendanceStats() { console.log('Viewing Attendance Stats'); }
-  </script>
-</body>
-</html>                  </div>`;
-
-      categories.forEach(cat => {
-        const catTasks = targetTasks.filter(t => t.category === cat);
-        const percent = calcVerification(catTasks);
-        html += `<button class="list-btn" onclick="openCategory('${cat}')">
-                   ${cat} <span class="indicator">${percent}% Verified</span>
-                 </button>`;
-      });
-
-      document.getElementById('categories-screen').innerHTML = html;
-      showScreen('categories-screen');
-    }
-
-    function openCategory(category) {
-      currentCategory = category;
-      // If we are looking at a specific student, skip the Task list and go straight to their actions
-      if (currentContext.type === 'student') {
-        renderActionScreen();
-      } else {
-        renderTasksScreen();
-      }
-    }
-
-    function renderTasksScreen() {
-      const targetTasks = getFilteredTasks().filter(t => t.category === currentCategory);
-      const tasks = [...new Set(targetTasks.map(t => t.task))];
-      
-      let html = `<div class="nav-header">
-                    <h2 class="nav-title">${currentCategory}</h2>
-                    <button class="back-btn" onclick="showScreen('categories-screen')">Back</button>
-                  </div>`;
-
-      tasks.forEach(task => {
-        const specificTasks = targetTasks.filter(t => t.task === task);
-        const percent = calcVerification(specificTasks);
-        html += `<button class="list-btn" onclick="openTask('${task}')">
-                   ${task} <span class="indicator">${percent}% Verified</span>
-                 </button>`;
-      });
-
-      document.getElementById('tasks-screen').innerHTML = html;
-      showScreen('tasks-screen');
-    }
-
-    function openTask(task) {
-      currentTask = task;
-      renderActionScreen();
-    }
-
-    // --- ACTION LIST RENDERING ---
-
-      function renderActionScreen() {
-      let activeTasks = [];
-      let title = "";
-      let backTarget = "";
-
-      if (currentContext.type === 'student') {
-        // Individual path: Show all tasks for the selected category
-        activeTasks = getFilteredTasks().filter(t => t.category === currentCategory);
-        title = `${studentsMap[currentContext.value]}: ${currentCategory}`;
-        backTarget = "showScreen('categories-screen')";
-      } else {
-        // Class/Group path: Show all students for the selected task
-        activeTasks = getFilteredTasks().filter(t => t.category === currentCategory && t.task === currentTask);
-        title = `Task: ${currentTask}`;
-        backTarget = "showScreen('tasks-screen')";
-        
-        // SORTING: Group first, then Alphabetically by Name
-        activeTasks.sort((a, b) => {
-            if (a.group === b.group) {
-                return a.name.localeCompare(b.name);
-            }
-            // Use numeric sorting for groups if possible, otherwise string sort
-            return a.group.localeCompare(b.group, undefined, {numeric: true});
-        });
-      }
-
-      let html = `<div class="nav-header">
-                    <h2 class="nav-title">${title}</h2>
-                    <button class="back-btn" onclick="${backTarget}">Back</button>
-                  </div>`;
-
-      let currentGroupHeader = "";
-
-      activeTasks.forEach(t => {
-        // Overlay any pending changes that haven't been saved to DB yet
-        const displayStatus = pendingUpdates[t.rowId]?.status || t.status;
-        const displayVerif = pendingUpdates[t.rowId]?.verification || t.verification;
-        
-        // Inject Group Headers for Class/Group views
-        if (currentContext.type !== 'student') {
-            if (t.group !== currentGroupHeader) {
-                currentGroupHeader = t.group;
-                html += `
-                  <div style="background-color: teal; color: #424242; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">
-                    GROUP ${t.group}
-                  </div>`;
-            }
-        }
-const labelText = currentContext.type === 'student' 
-  ? t.task 
-  : `<span style="color: WhiteSmoke; font-weight: normal; font-size: 1rem;">${t.name}</span>`;
-
-        html += `
-          <div class="action-row">
-            <div class="action-title">${labelText}</div>
-            <div class="toggle-container">
-              <div class="toggle-item" onclick="toggleLocalStatus(${t.rowId})">
-
-    
-                ${displayStatus === 'Completed' ? '<span class="tick-green">✓</span>' : '<span class="text-grey">To be completed</span>'}
-              </div>
-              <div class="toggle-item" onclick="toggleLocalVerif(${t.rowId})">
-                ${displayVerif === 'Verified' ? '<span class="tick-gold">✓</span>' : '<span class="text-grey">To be verified</span>'}
-              </div>
-            </div>
-          </div>`;
-      });
-
-      if (Object.keys(pendingUpdates).length > 0) {
-         html += `<div id="save-bar"><button class="save-btn" onclick="saveBatchUpdates()">Save Changes</button></div>`;
-      }
-
-      document.getElementById('action-screen').innerHTML = html;
-      showScreen('action-screen');
-    }
-    
-        
-
-    // --- TOGGLE LOGIC ---
-    function toggleLocalStatus(rowId) {
-      const originalTask = allTasks.find(t => t.rowId === rowId);
-      if (!pendingUpdates[rowId]) pendingUpdates[rowId] = { status: originalTask.status, verification: originalTask.verification, rowId: rowId };
-      
-      pendingUpdates[rowId].status = pendingUpdates[rowId].status === 'Completed' ? 'To be completed' : 'Completed';
-      renderActionScreen();
-    }
-
-    function toggleLocalVerif(rowId) {
-      const originalTask = allTasks.find(t => t.rowId === rowId);
-      if (!pendingUpdates[rowId]) pendingUpdates[rowId] = { status: originalTask.status, verification: originalTask.verification, rowId: rowId };
-      
-      pendingUpdates[rowId].verification = pendingUpdates[rowId].verification === 'Verified' ? 'Unverified' : 'Verified';
-      
-      // Auto-complete status if they mark it verified
-      if (pendingUpdates[rowId].verification === 'Verified') pendingUpdates[rowId].status = 'Completed';
-      
-      renderActionScreen();
-    }
-
-    // --- SAVE LOGIC ---
-    function saveBatchUpdates() {
-      const changesArr = Object.values(pendingUpdates);
-      if (changesArr.length === 0) return;
-
-      document.querySelector('.save-btn').innerText = "Saving...";
-      
-      apiCall({ action: 'adminUpdateTasks', changes: changesArr }).then(res => {
-         if (res.success) {
-            // Apply changes locally to avoid needing to refresh all data
-            changesArr.forEach(c => {
-               const taskIndex = allTasks.findIndex(t => t.rowId === c.rowId);
-               if (taskIndex > -1) {
-                  allTasks[taskIndex].status = c.status;
-                  allTasks[taskIndex].verification = c.verification;
-               }
-            });
-            pendingUpdates = {}; // Clear queue
-            renderActionScreen(); // Re-render without the save bar
-            alert("Changes saved successfully!");
-         } else {
-            alert("Save failed. Please try again.");
-            document.querySelector('.save-btn').innerText = "Save Changes";
-         }
-      });
-    }
-    // ==========================================
-    // ATTENDANCE FUNCTIONS
-    // ==========================================
-
-    function openAttendance() {
-      // Default everyone to 'Present' when opening the screen
-      attendanceState = {};
-      allStudents.forEach(s => {
-         attendanceState[s.pin] = 'Present';
-      });
-      renderAttendanceScreen();
-    }
-
-    function renderAttendanceScreen() {
-      // Get today's date in YYYY-MM-DD format for the date picker
-      const today = new Date().toISOString().split('T')[0];
-      
-      let html = `<div class="nav-header">
-                    <h2 class="nav-title">Attendance</h2>
-                    <button class="back-btn" onclick="showScreen('admin-dashboard')">Back</button>
-                  </div>
-                  <input type="date" id="attendance-date" value="${today}" style="width: 90%; margin-bottom: 15px; font-family: sans-serif; text-align: center;">`;
-
-      let currentGroupHeader = "";
-
-      // Sort students by Group, then Alphabetically by Name
-      let sortedStudents = [...allStudents].sort((a, b) => {
-          if (a.group === b.group) return a.name.localeCompare(b.name);
-          return a.group.localeCompare(b.group, undefined, {numeric: true});
-      });
-
-      sortedStudents.forEach(s => {
-          // Inject Group Headers
-          if (s.group !== currentGroupHeader) {
-              currentGroupHeader = s.group;
-              html += `<div style="background-color: teal; color: white; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">GROUP ${s.group}</div>`;
-          }
-
-          const isPresent = attendanceState[s.pin] === 'Present';
-
-          // Render Row with Toggle Button
-          html += `
-          <div class="action-row" style="flex-direction: row; justify-content: space-between; align-items: center;">
-            <div class="action-title" style="margin-bottom: 0;">${s.name}</div>
-            <div onclick="toggleAttendance('${s.pin}')" style="cursor: pointer; padding: 6px 15px; border-radius: 5px; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; ${isPresent ? 'background-color: #e8f5e9; color: forestgreen; border: 1px solid forestgreen;' : 'background-color: #ffebee; color: crimson; border: 1px solid crimson;'}">
-              ${isPresent ? 'PRESENT ✔&#xFE0E;' : 'ABSENT ✘&#xFE0E;'}
-            </div>
-          </div>`;
-      });
-
-      html += `<div id="save-bar"><button class="save-btn" onclick="submitAttendance()">Save Attendance</button></div>`;
-
-      document.getElementById('attendance-screen').innerHTML = html;
-      showScreen('attendance-screen');
-    }
-
-    function toggleAttendance(pin) {
-      // Flip the state and re-render
-      attendanceState[pin] = attendanceState[pin] === 'Present' ? 'Absent' : 'Present';
-      renderAttendanceScreen();
-    }
-
-    function submitAttendance() {
-      const dateVal = document.getElementById('attendance-date').value;
-      if (!dateVal) return alert("Please select a date.");
-
-      // Gather only the absentees for the backend
-      const absentees = [];
-      allStudents.forEach(s => {
-         if (attendanceState[s.pin] === 'Absent') {
-             // Backend uses whatsappnum field, we pass the PIN so it logs correctly
-             absentees.push({ name: s.name, whatsappnum: s.pin }); 
-         }
-      });
-
-      // Update UI while saving
-      document.querySelector('#attendance-screen .save-btn').innerText = "Saving to Database...";
-
-      apiCall({
-        action: 'markAttendance',
-        date: dateVal,
-        absentees: absentees
-      }).then(res => {
-         if (res.success) {
-             alert("Attendance saved successfully!");
-             showScreen('admin-dashboard'); // Go back to dashboard
-         } else {
-             alert("Failed to save attendance: " + res.message);
-             document.querySelector('#attendance-screen .save-btn').innerText = "Save Attendance";
-         }
-      }).catch(err => {
-         alert("Network Error. Please try again.");
-         document.querySelector('#attendance-screen .save-btn').innerText = "Save Attendance";
-      });
-    }
-  
-    function openMarkRegister() { showScreen('attendance-action-screen'); }
-    function openViewAttendance() { console.log('Viewing Attendance Records'); }
-    function openAttendanceStats() { console.log('Viewing Attendance Stats'); }
-  </script>
-</body>
-</html>
+          if (
