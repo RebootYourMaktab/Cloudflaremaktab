@@ -74,7 +74,7 @@
       <button class="list-btn" onclick="openContext('student', document.getElementById('student-selector').value)" style="justify-content: center;">View Student</button>
     </div>
 
-    <button onclick="location.reload()" style="background: darkred; color: white; border-color: maroon; margin-top: 20px;">Exit Dashboard</button>
+    <button onclick="location.reload()" style="background: teal; color: white; border-color: teal ; margin-top: 20px;">Exit Dashboard</button>
   </div>
 
   <div id="categories-screen" class="screen"></div>
@@ -117,7 +117,7 @@
 
     function verifyAdminLogin() {
       const pin = document.getElementById('adminPin').value;
-      document.getElementById('error-message').innerText = "Loading data...";
+      document.getElementById('error-message').innerHTML = <h4>"Loading data...."</h4> ;
       
       apiCall({ action: 'adminLogin', pin: pin, token: urlToken }).then(data => {
         if (data.success) {
@@ -130,19 +130,40 @@
       });
     }
 
-    function fetchDashboardData() {
+   function fetchDashboardData() {
        apiCall({ action: 'getAdminDashboardData' }).then(data => {
            if (data.success) {
                allTasks = data.tasks;
                
-               // Populate Dropdowns
+               // Populate Group Dropdown
                const grpSelect = document.getElementById('group-selector');
+               grpSelect.innerHTML = '<option value="">Select a Group...</option>';
                data.groups.forEach(g => grpSelect.innerHTML += `<option value="${g}">Group ${g}</option>`);
                
+               // Populate Student Dropdown (Grouped and Alphabetical)
                const stuSelect = document.getElementById('student-selector');
+               stuSelect.innerHTML = '<option value="">Select a Student...</option>';
+               
+               const studentsByGroup = {};
                data.students.forEach(s => {
                  studentsMap[s.pin] = s.name;
-                 stuSelect.innerHTML += `<option value="${s.pin}">${s.name} (Grp ${s.group})</option>`;
+                 if (!studentsByGroup[s.group]) studentsByGroup[s.group] = [];
+                 studentsByGroup[s.group].push(s);
+               });
+
+               // Sort groups numerically/alphabetically
+               Object.keys(studentsByGroup).sort().forEach(group => {
+                 let optgroup = document.createElement('optgroup');
+                 optgroup.label = `Group ${group}`;
+                 
+                 // Sort students alphabetically within the group
+                 studentsByGroup[group].sort((a, b) => a.name.localeCompare(b.name)).forEach(s => {
+                   let opt = document.createElement('option');
+                   opt.value = s.pin;
+                   opt.innerText = s.name;
+                   optgroup.appendChild(opt);
+                 });
+                 stuSelect.appendChild(optgroup);
                });
 
                showScreen('admin-dashboard');
@@ -151,7 +172,6 @@
            }
        });
     }
-
     // --- MATH & FILTERING CORE ---
     function getFilteredTasks() {
       if (currentContext.type === 'group') return allTasks.filter(t => t.group === currentContext.value);
@@ -234,7 +254,8 @@
     }
 
     // --- ACTION LIST RENDERING ---
-    function renderActionScreen() {
+
+      function renderActionScreen() {
       let activeTasks = [];
       let title = "";
       let backTarget = "";
@@ -249,6 +270,15 @@
         activeTasks = getFilteredTasks().filter(t => t.category === currentCategory && t.task === currentTask);
         title = `Task: ${currentTask}`;
         backTarget = "showScreen('tasks-screen')";
+        
+        // SORTING: Group first, then Alphabetically by Name
+        activeTasks.sort((a, b) => {
+            if (a.group === b.group) {
+                return a.name.localeCompare(b.name);
+            }
+            // Use numeric sorting for groups if possible, otherwise string sort
+            return a.group.localeCompare(b.group, undefined, {numeric: true});
+        });
       }
 
       let html = `<div class="nav-header">
@@ -256,11 +286,24 @@
                     <button class="back-btn" onclick="${backTarget}">Back</button>
                   </div>`;
 
+      let currentGroupHeader = "";
+
       activeTasks.forEach(t => {
         // Overlay any pending changes that haven't been saved to DB yet
         const displayStatus = pendingUpdates[t.rowId]?.status || t.status;
         const displayVerif = pendingUpdates[t.rowId]?.verification || t.verification;
         
+        // Inject Group Headers for Class/Group views
+        if (currentContext.type !== 'student') {
+            if (t.group !== currentGroupHeader) {
+                currentGroupHeader = t.group;
+                html += `
+                  <div style="background-color: teal; color: white; padding: 10px; margin-top: 15px; margin-bottom: 5px; border-radius: 5px; font-family: 'Gagalin', sans-serif; text-align: center; letter-spacing: 1px;">
+                    GROUP ${t.group}
+                  </div>`;
+            }
+        }
+
         const labelText = currentContext.type === 'student' ? t.task : t.name;
 
         html += `
@@ -284,6 +327,8 @@
       document.getElementById('action-screen').innerHTML = html;
       showScreen('action-screen');
     }
+    
+        
 
     // --- TOGGLE LOGIC ---
     function toggleLocalStatus(rowId) {
