@@ -45,21 +45,44 @@ input, select {
     
     .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
     .category-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px 10px; height: 100%; }
-    table { width: 100%; border-collapse: collapse;
-      table-layout: fixed; margin-top: 10px; background-color: tan; }
-    th, td { text-align: left; padding: 10px 5px; border-bottom: 2px solid rgba(128,0,0,0.1); font-size: 0.9rem;}
-    th { font-family: 'Gagalin', sans-serif; color: #27445D; text-align: center; }
+
+<table style="width: 100%; border-collapse: collapse; margin-top: 10px; background-color: wheat;">
+  <thead>
+    <tr style="border-bottom: 2px #27445D;">
+      <th style="width: 50%; text-align: left;">Column 1</th>
+      <th style="width: 25%;">Column 2</th>
+      <th style="width: 25%;">Column 3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom: 2px #27445D;">
+      <td style="text-align: left;">50% Width / Left</td>
+      <td style="text-align: center;">25% Width / Center</td>
+      <td style="text-align: center;">25% Width / Center</td>
+    </tr>
+  </tbody>
+</table>
+     th, td { 
+    padding: 10px 5px; 
+    font-size: 0.9rem;
+  }
+  th { 
+    font-family: 'Gagalin', sans-serif; 
+    color: #27445D; 
+    text-align: center; 
+  }
+
     .status-toggle { cursor: pointer; }
     .forest-tick { color: limegreen; font-size: 1.5rem; }
-    .#27445D-tick { color: #27445D; font-size: 1.5rem; }
-    .gray-cloud { background-color: transparent; color: lightgrey; font-size: 0.7rem; padding: 3px 6px; border-radius: 10px; }
+    .gold-tick { color: gold; font-size: 1.5rem; }
+    .gray-cloud { background-color: transparent; color: 8db0cf ; font-size: 0.7rem; padding: 3px 6px; border-radius: 10px; }
     .progress-container { width: 100%; background-color: rgba(128, 0, 0, 0.1); border-radius: 5px; height: 8px; margin-top: 8px; overflow: hidden; }
     .progress-fill { background-color: limegreen; height: 100%; transition: width 0.3s ease; }
     
     #task-progress-wrapper { height: 12px; margin-bottom: 15px; }
 
     /* NEW: Audio Button Styling */
-    .audio-btn { background-color: sienna; color: Seashell; border: 2px solid #2980b9; padding: 4px 8px; font-size: 0.7rem; border-radius: 5px; margin-top: 8px; margin-left: 0; display: inline-block; font-family: sans-serif; letter-spacing: 0; }
+    .audio-btn { background-color: #27445D; color: Seashell; border: 2px solid #2980b9; padding: 4px 8px; font-size: 0.7rem; border-radius: 5px; margin-top: 8px; margin-left: 0; display: inline-block; font-family: sans-serif; letter-spacing: 0; }
     .audio-btn:active { background-color: sienna; transform: scale(0.95); }
     .audio-playing { background-color: wheat; border-color: sienna; } /* Turns Orange when playing */
 
@@ -248,9 +271,9 @@ function apiCall(payload) {
             </div>
           </td>
           <td class="center status-toggle" onclick="toggle('${task.taskId}', this)">
-            ${isComp ? `<span class="forest-tick">&#10004;&#xFE0E;</span>` : `<span class="gray-cloud">To be completed</span>`}
+            ${isComp ? `<span class="forest-tick">✓;</span>` : `<span class="gray-cloud">To be completed</span>`}
           </td>
-          <td class="center">${task.verification === "Verified" ? `<span class="#27445D-tick">&#10004;&#xFE0E;</span>` : `<span class="gray-cloud">Not Verified</span>`}</td>`;
+          <td class="center">${task.verification === "Verified" ? `<span class="gold-tick">✓;</span>` : `<span class="gray-cloud">Not Verified</span>`}</td>`;
         tbody.appendChild(tr);
       });
     }
@@ -315,7 +338,7 @@ function apiCall(payload) {
       const newStatus = isComp ? "To be completed" : "Completed";
       
       pendingChanges[taskId] = newStatus;
-      el.innerHTML = isComp ? `<span class="gray-cloud">Pending</span>` : `<span class="forest-tick">&#10004;&#xFE0E;</span>`;
+      el.innerHTML = isComp ? `<span class="gray-cloud">Pending</span>` : `<span class="forest-tick">✓;</span>`;
       
       const taskIndex = currentTasksList.findIndex(t => String(t.taskId) === String(taskId));
       if (taskIndex !== -1) {
