@@ -115,6 +115,7 @@
   <div id="tasks-screen" class="view"></div>
   <div id="action-screen" class="view"></div>
   <div id="attendance-action-screen" class="view"></div>
+  <div id="view-attendance-screen" class="view"></div>
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwTSI8edGh-riqutqrOci9d66hKos8a7kcB7VDw6FsUhZw91C4IvHOlKvR47Vr_DHqK/exec";
@@ -488,8 +489,18 @@
       });
     }
 
-    function openViewAttendance() { alert('Viewing Attendance Records coming soon!'); }
-    function openAttendanceStats() { alert('Viewing Attendance Stats coming soon!'); }
-  </script>
-</body>
-</html>
+    // --- NEW VIEW ATTENDANCE LOGIC ADDED HERE ---
+    
+    // Helper to get Start and End dates for the Current Month
+    function getDefaultDateRange() {
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      return {
+        start: firstDay.toISOString().split('T')[0],
+        end: now.toISOString().split('T')[0] // Defaults to Today
+      };
+    }
+
+    function openViewAttendance() { 
+      const range = getDefaultDateRange();
+      renderViewAttendanceScreen(range.start, range.end);
