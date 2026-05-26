@@ -7,91 +7,102 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.cdnfonts.com/css/gagalin" rel="stylesheet">
 
-
   <style>
-    body { background-color: seashell ; color: #27445D; 
-      font-family: sans-serif; display: flex; justify-content: center; 
-      align-items: center; min-height: 100vh; margin: 0; padding: 10px;
-       box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { 
+      background-color: seashell; 
+      color: #27445D; 
+      font-family: sans-serif; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      min-height: 100vh; 
+      margin: 0; 
+      padding: 10px;
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent; 
+    }
+    
     h1, h2, h3, h4 { color: #27445D; font-family: 'GAGALIN', cursive; letter-spacing: 1px; font-weight: normal; margin-top: 0;}
-    .screen { background-color: wheat; padding: 20px; border-radius: 10px; 
-      box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); text-align: center; width: 100%; max-width: 400px; }
+    
+    .screen { 
+      background-color: wheat; 
+      padding: 20px; 
+      border-radius: 10px; 
+      box-shadow: 0 4px 12px rgba(128, 0, 0, 0.15); 
+      text-align: center; 
+      width: 100%; 
+      max-width: 400px; 
+    }
+    
     #dashboard-screen, #task-screen { display: none; width: 100%; max-width: 600px; }
   
     .app-logo { 
-       width: 35vw;             /* Takes up 35% of the screen's width on small devices */
-     max-width: 140px;        /* ...but stops growing once it hits 140px on larger screens */
-       aspect-ratio: 1 / 1;     /* MAGIC FIX: Automatically forces the height to perfectly match the width */
-            object-fit: cover;       
-           border-radius: 50%;      
-            background-color: transparent; 
-                 margin-bottom: 15px; 
-        }
-input, select { 
-  padding: 12px; 
-  margin: 10px 0 20px 0; 
-  border-radius: 5px; 
-  border: 1px solid #27445D 
-  width: 85%; 
-  font-size: 1rem; 
-  color: #27445D; 
-
-}    button { background-color: #27445D; color: Seashell; border: 3px solid #27445D; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
+       width: 35vw;             
+       max-width: 140px;        
+       aspect-ratio: 1 / 1;     
+       object-fit: cover;      
+       border-radius: 50%;      
+       background-color: transparent; 
+       margin-bottom: 15px; 
+    }
+    
+    input, select { 
+      padding: 12px; 
+      margin: 10px 0 20px 0; 
+      border-radius: 5px; 
+      border: 1px solid #27445D; /* FIXED: Added missing semicolon */
+      width: 85%; 
+      font-size: 1rem; 
+      color: #27445D; 
+    }
+    
+    button { background-color: #27445D; color: Seashell; border: 3px solid #27445D; border-radius: 12px; font-size: 1.1rem; font-family: 'Gagalin', sans-serif; letter-spacing: 1px; cursor: pointer; padding: 10px 20px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; margin: 5px; }
     button:active { background-color: #27445D; color: Seashell; transform: scale(0.95); }
+    
     .login-btn { width: 90%; padding: 12px; }
     .save-exit-btn { background-color: #27445D; color: Seashell; padding: 10px 20px; font-size: 1.2rem; margin-top: 20px; }
-    
     .exit-app-btn { background-color: #27445D; color: tan;  padding: 10px 20px; font-size: 1.1rem; margin-top: 30px; }
     
     .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
     .category-btn { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px 10px; height: 100%; }
 
-<table style="width: 100%; border-collapse: collapse; margin-top: 10px; background-color: wheat;">
-  <thead>
-    <tr style="border-bottom: 2px solid #27445D;">
-      <th style="width: 50%; text-align: center;">Column 1</th>
-      <th style="width: 25%;">Column 2</th>
-      <th style="width: 25%;">Column 3</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr style="border-bottom: 2px solid #27445D;">
-      <!-- Added width percentages to the cells below -->
-      <td style="width: 50%; text-align: left;">50% Width / Left</td>
-      <td style="width: 25%; text-align: center;">25% Width / Center</td>
-      <td style="width: 25%; text-align: center;">25% Width / Center</td>
-    </tr>
-  </tbody>
-</table>
-
-     th, td { padding: 10px 5px;  font-size: 0.9rem }
-  th {  font-family: 'Gagalin', sans-serif; color: #27445D;  text-align: center; }
+    /* --- FIXED TABLE CSS --- */
+    table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-top: 10px; background-color: wheat; }
+    th, td { padding: 8px 5px; font-size: 0.9rem; word-wrap: break-word; }
+    th { font-family: 'Gagalin', sans-serif; color: #27445D; text-align: center; border-bottom: 2px solid #27445D; padding-bottom: 10px;}
+    tr { border-bottom: 2px solid rgba(39, 68, 93, 0.2); }
+    
+    /* Forces the 50% / 25% / 25% sizing on your table */
+    th:nth-child(1), td:nth-child(1) { width: 50%; text-align: left; }
+    th:nth-child(2), td:nth-child(2) { width: 25%; text-align: center; }
+    th:nth-child(3), td:nth-child(3) { width: 25%; text-align: center; }
+    /* ----------------------- */
 
     .status-toggle { cursor: pointer; }
     .forest-tick { color: limegreen; font-size: 1.5rem; }
     .gold-tick { color: goldenrod; font-size: 1.5rem; }
-    .gray-cloud { background-color: transparent; color: 8db0cf ; font-size: 0.7rem; padding: 3px 6px; border-radius: 10px; }
+    .gray-cloud { background-color: transparent; color: #8db0cf; font-size: 0.7rem; padding: 3px 6px; border-radius: 10px; }
     .progress-container { width: 100%; background-color: rgba(128, 0, 0, 0.1); border-radius: 5px; height: 8px; margin-top: 8px; overflow: hidden; }
     .progress-fill { background-color: limegreen; height: 100%; transition: width 0.3s ease; }
     
     #task-progress-wrapper { height: 12px; margin-bottom: 15px; }
 
-    /* NEW: Audio Button Styling */
+    /* Audio Button Styling */
     .audio-btn { background-color: #27445D; color: Seashell; border: 2px solid #2980b9; padding: 4px 8px; font-size: 0.7rem; border-radius: 5px; margin-top: 8px; margin-left: 0; display: inline-block; font-family: sans-serif; letter-spacing: 0; }
     .audio-btn:active { background-color: sienna; transform: scale(0.95); }
-    .audio-playing { background-color: tan; border-color: tan; } /* Turns tan when playing */
+    .audio-playing { background-color: tan; border-color: tan; } 
 
     .quote-box { 
       margin-top: 30px; 
       margin-bottom: 20px; 
-      font-size: 1rem; /* Fixed: Removed the dot before rem */
+      font-size: 1rem; 
       font-family: 'Comic Sans MS';
       font-style: normal;
-      color: #27445D; /* Fixed: Changed from HTML inline style to proper CSS property */
+      color: #27445D; 
       line-height: 1.4; 
-      padding: 20px 10px 20px 10px; /* Fixed: Combined your padding rules (Top, Right, Bottom, Left) */
+      padding: 20px 10px 20px 10px; 
       min-height: 40px;
-      border: 1px dashed #27445D; /* Added the missing semicolon at the end */
+      border: 1px dashed #27445D; 
       border-radius: 12px; 
     }
 
@@ -106,7 +117,7 @@ input, select {
     <input type="password" id="studentPin" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="1234">
     <button class="login-btn" onclick="attemptLogin()">Log In</button>
     <br>
-    <div id="quote-box" class="quote-box" >......</div>
+    <div id="quote-box" class="quote-box">......</div>
     <p id="error-message" style="color: red; font-weight: bold;"></p>
   </div>
 
@@ -145,38 +156,39 @@ input, select {
     let currentTasksList = [];
     let currentCategories = [];
 
-    // NEW: Audio Control Variables
+    // Audio Control Variables
     let currentAudio = null;
     let playingTaskId = null;
 
-function apiCall(payload) {
-  return fetch(SCRIPT_URL, {
-    method: 'POST',
-    redirect: 'follow', // Crucial: Apps Script redirects the request to a different Google server
-    headers: {
-      'Content-Type': 'text/plain;charset=utf-8' // MUST be text/plain to avoid CORS errors
-    },
-    body: JSON.stringify(payload)
-  })
-  .then(response => {
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
+    function apiCall(payload) {
+      return fetch(SCRIPT_URL, {
+        method: 'POST',
+        redirect: 'follow', 
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8' 
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      });
     }
-    return response.json();
-  });
-}
-// Fetch Quote in the background (No button locking, no waiting)
+
+    // Fetch Quote in the background
     window.onload = function() {
         apiCall({ action: 'getQuote' })
         .then(data => {
             if (data && data.success && data.quote) {
                 document.getElementById('quote-box').innerText = '"' + data.quote + '"';
             } else {
-                document.getElementById('quote-box').innerText = '"SMessenger of Allah (ﷺ) said: "Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him""';
+                document.getElementById('quote-box').innerText = '"Messenger of Allah (ﷺ) said: Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him"';
             }
         })
         .catch(err => {
-            document.getElementById('quote-box').innerText = '"SMessenger of Allah (ﷺ) said: "Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him""'; 
+            document.getElementById('quote-box').innerText = '"Messenger of Allah (ﷺ) said: Whoever takes a path upon which to obtain knowledge, Allah makes the path to Paradise easy for him"'; 
         });
     };
 
@@ -192,12 +204,9 @@ function apiCall(payload) {
           document.getElementById('login-screen').style.display = 'none';
           document.getElementById('dashboard-screen').style.display = 'block';
           
-          // The new multi-line formatting for the welcome message
-          
           document.getElementById('welcome-message').innerHTML = `
             <h1>${data.studentData.name}</h1>
             <h2 style="margin-bottom: 5px">* Ahlan wa sahlan *</h2>
-          
           `;
           
           renderDashboard(currentCategories);
@@ -251,7 +260,6 @@ function apiCall(payload) {
       tasks.forEach(task => {
         const isComp = (task.status === "Completed");
         
-        // NEW: Check for an MP3 URL from the backend and build the button
         let audioButtonHtml = "";
         if (task.mp3Url && task.mp3Url.length > 5) {
             audioButtonHtml = `<button class="audio-btn" id="audio-btn-${task.taskId}" onclick="toggleAudio('${task.taskId}', '${task.mp3Url}')">▶ Play Audio</button>`;
@@ -266,18 +274,16 @@ function apiCall(payload) {
             </div>
           </td>
           <td class="center status-toggle" onclick="toggle('${task.taskId}', this)">
-            ${isComp ? `<span class="forest-tick">✓;</span>` : `<span class="gray-cloud">To be completed</span>`}
+            ${isComp ? `<span class="forest-tick">✓</span>` : `<span class="gray-cloud">To be completed</span>`}
           </td>
           <td class="center">${task.verification === "Verified" ? `<span class="gold-tick">✓</span>` : `<span class="gray-cloud">Not Verified</span>`}</td>`;
         tbody.appendChild(tr);
       });
     }
 
-    // NEW: Audio Control Functions
     function toggleAudio(taskId, url) {
         const btn = document.getElementById(`audio-btn-${taskId}`);
 
-        // Stop if clicking the exact SAME playing button
         if (currentAudio && playingTaskId === taskId) {
             currentAudio.pause();
             currentAudio.currentTime = 0; 
@@ -288,7 +294,6 @@ function apiCall(payload) {
             return;
         }
 
-        // Stop any old audio if starting a new one
         if (currentAudio) {
             currentAudio.pause();
             currentAudio.currentTime = 0;
@@ -299,7 +304,6 @@ function apiCall(payload) {
             }
         }
 
-        // Play the new audio
         currentAudio = new Audio(url);
         currentAudio.play().catch(err => {
             alert("Could not play this audio. Check the link in the spreadsheet.");
@@ -310,7 +314,6 @@ function apiCall(payload) {
         btn.classList.add("audio-playing");
         playingTaskId = taskId;
 
-        // Auto-reset when audio finishes naturally
         currentAudio.onended = function() {
             btn.innerHTML = "▶ Play Audio";
             btn.classList.remove("audio-playing");
@@ -319,7 +322,6 @@ function apiCall(payload) {
         };
     }
 
-    // Function to kill audio immediately (used when leaving the page)
     function stopAllAudio() {
         if (currentAudio) {
             currentAudio.pause();
@@ -350,7 +352,7 @@ function apiCall(payload) {
     }
 
     function saveAndExit() {
-      stopAllAudio(); // Kill audio on save
+      stopAllAudio(); 
       
       if (Object.keys(pendingChanges).length === 0) { 
         returnToDashboard();
@@ -388,7 +390,7 @@ function apiCall(payload) {
     }
 
     function returnToDashboard() {
-        stopAllAudio(); // Kill audio when backing out
+        stopAllAudio(); 
         document.getElementById('task-screen').style.display = 'none';
         document.getElementById('dashboard-screen').style.display = 'block';
     }
