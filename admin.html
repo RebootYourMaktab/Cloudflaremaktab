@@ -329,32 +329,65 @@
       const range = getDefaultDateRange();
       renderViewAttendanceScreen(range.start, range.end);
     }
-
-    function renderViewAttendanceScreen(startDate, endDate) {
+function renderViewAttendanceScreen(startDate, endDate) {
       const start = new Date(startDate).setHours(0,0,0,0);
       const end = new Date(endDate).setHours(23,59,59,999);
-      const validRecords = allAttendance.filter(r => { const d = new Date(r.date).getTime(); return d >= start && d <= end; });
+      
+      const validRecords = allAttendance.filter(r => {
+         const d = new Date(r.date).getTime();
+         return d >= start && d <= end;
+      });
+
       const uniqueDates = [...new Set(validRecords.map(r => new Date(r.date).toISOString().split('T')[0]))];
       const totalDays = uniqueDates.length;
 
-      let html = `<div class="nav-header"><h2 class="nav-title">Attendance Records</h2><button class="back-btn" onclick="showScreen('attendance-dashboard')">Back</button></div>
-                  <div style="margin-bottom:10px;"><input type="date" id="view-start-date" value="${startDate}"> <input type="date" id="view-end-date" value="${endDate}">
-                  <button onclick="renderViewAttendanceScreen(document.getElementById('view-start-date').value, document.getElementById('view-end-date').value)">Filter</button></div>
-                  <div style="margin-bottom: 10px; font-weight: bold;">Total Days: ${totalDays}</div>`;
+      let html = `<div class="nav-header">
+                    <h2 class="nav-title">Attendance: May 2026</h2>
+                    <button class="back-btn" onclick="showScreen('attendance-dashboard')">Back</button>
+                  </div>
+                  
+                  <div style="margin-bottom: 15px; background: WhiteSmoke; padding: 10px; border-radius: 8px;">
+                    <input type="date" id="view-start-date" value="${startDate}"> 
+                    <input type="date" id="view-end-date" value="${endDate}">
+                    <button onclick="renderViewAttendanceScreen(document.getElementById('view-start-date').value, document.getElementById('view-end-date').value)">Filter</button>
+                  </div>`;
+
+      // Sticky Header
+      html += `<div style="position: sticky; top: 0; background: #E5E4E2; display: flex; padding: 10px 5px; font-weight: bold; border-bottom: 2px solid teal; z-index: 10;">
+                 <div style="width: 50%; text-align: left;">NAME</div>
+                 <div style="width: 35%; text-align: center;">DAYS ABSENT</div>
+                 <div style="width: 15%; text-align: right;">% ATT</div>
+               </div>`;
 
       let currentGroupHeader = "";
-      allStudents.sort((a,b) => a.group.localeCompare(b.group) || a.name.localeCompare(b.name)).forEach(s => {
-          if (s.group !== currentGroupHeader) { currentGroupHeader = s.group; html += `<div style="background-color: teal; color: white; padding: 5px; margin-top:10px;">GROUP ${s.group}</div>`; }
-          const absences = validRecords.filter(r => r.whatsappnum == s.pin || r.pin == s.pin);
+      
+      // Filter out Group 0 and sort
+      let activeStudents = allStudents.filter(s => s.group !== "0");
+      activeStudents.sort((a, b) => a.group.localeCompare(b.group) || a.name.localeCompare(b.name)).forEach(s => {
+          
+          if (s.group !== currentGroupHeader) {
+              currentGroupHeader = s.group;
+              html += `<div style="background-color: teal; color: white; padding: 5px; margin-top:10px; font-family: 'Gagalin';">GROUP ${s.group}</div>`;
+          }
+
+          const absences = validRecords.filter(r => (r.whatsappnum == s.pin || r.pin == s.pin) && r.status === "Absent");
           const dates = absences.map(r => new Date(r.date).toLocaleDateString());
           const daysAbsent = dates.length;
+          
+          // Calculate %: (Total days - Days absent) / Total days
           const percent = totalDays === 0 ? 0 : Math.round(((totalDays - daysAbsent) / totalDays) * 100);
           
-          html += `<div style="background-color: #696969; color: white; padding: 10px; margin-top: 2px; border-radius: 4px; cursor: pointer;" onclick="const el=document.getElementById('d-${s.pin}'); el.style.display=el.style.display==='none'?'block':'none'">
-                    <div style="display:flex; justify-content:space-between;"><span>${s.name}</span><span>${daysAbsent} Absent</span><span>${percent}%</span></div>
-                    <div id="d-${s.pin}" style="display:none; margin-top:5px; font-size:0.8rem; color:lightgray;">Dates: ${dates.join(', ') || 'None'}</div>
+          html += `<div style="background-color: #696969; color: white; padding: 10px; margin-top: 2px; border-radius: 4px; cursor: pointer; display: flex; align-items: center;" 
+                        onclick="const el=document.getElementById('d-${s.pin}'); el.style.display=el.style.display==='none'?'block':'none'">
+                    <div style="width: 50%; text-align: left; font-weight: bold;">${s.name}</div>
+                    <div style="width: 35%; text-align: center;">${daysAbsent}</div>
+                    <div style="width: 15%; text-align: right;">${percent}%</div>
+                   </div>
+                   <div id="d-${s.pin}" style="display:none; padding: 5px; background: #555; color: lightgray; font-size: 0.8rem;">
+                     Absent Dates: ${dates.join(', ') || 'None'}
                    </div>`;
       });
+
       document.getElementById('view-attendance-screen').innerHTML = html;
       showScreen('view-attendance-screen');
     }
