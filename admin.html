@@ -467,14 +467,14 @@ const rowColor = 'teal';
             <div style="
               width:25%;
               text-align:center;
-              color:teal
+              color:whitesmoke
             ">
               ${student.absentCount}
             </div>
             <div style="
               width:15%;
               text-align:center;
-              color:${rowColor};
+              color:whitesmoke
             ">
               ${student.attendancePercent}%
             </div>
@@ -630,8 +630,11 @@ function renderAttendanceStatsScreen(startDate, endDate) {
           <div class="dashboard-section" style="background-color: #f5f5f5;">
             <h3 style="color: teal;">Group Breakdown</h3>`;
             
-        groupStats.sort((a,b) => Number(a.group) - Number(b.group)).forEach(stat => {
-          let barColor = stat.percent >= 90 ? '#2e7d32' : stat.percent >= 75 ? '#ef6c00' : '#c62828';
+       // Sort groups numerically (1 to 4)
+        groupStats.sort((a, b) => Number(a.group) - Number(b.group)).forEach(stat => {
+          // Permanently set to limegreen
+          let barColor = 'limegreen'; 
+          
           html += `
             <div style="margin-bottom: 12px;">
               <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: sans-serif; color: #424242; font-size: 0.9rem;">
@@ -643,18 +646,29 @@ function renderAttendanceStatsScreen(startDate, endDate) {
               </div>
             </div>`;
         });
+        });
             
+        // ... (rest of your stats HTML generation)
+        
         html += `</div>
           <div class="dashboard-section" style="background-color: #f5f5f5;">
             <h3 style="color: teal; margin-bottom: 10px;">100% Attendance 🏆</h3>
             <div style="background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 8px; padding: 10px; max-height: 250px; overflow-y: auto;">`;
             
-        if (totalDays === 0) { html += `<div style="text-align: center; color: #666; padding: 10px;">No days recorded.</div>`; } 
-        else if (perfectStudents.length === 0) { html += `<div style="text-align: center; color: #666; padding: 10px;">No students have 100% attendance.</div>`; } 
-        else { perfectStudents.forEach(s => { html += `<div style="padding: 8px 5px; border-bottom: 1px dashed #a5d6a7; font-weight: bold; color: #2e7d32;">⭐ ${s}</div>`; }); }
+        if (totalDays === 0) { 
+           html += `<div style="text-align: center; color: #666; padding: 10px;">No days recorded.</div>`; 
+        } else if (perfectStudents.length === 0) { 
+           html += `<div style="text-align: center; color: #666; padding: 10px;">No students have 100% attendance.</div>`; 
+        } else { 
+           // FIX: Correctly access the properties 'name' and 'group' from the object
+           perfectStudents.forEach(s => { 
+             html += `<div style="padding: 8px 5px; border-bottom: 1px dashed #a5d6a7; font-weight: bold; color: #2e7d32;">
+                        ⭐ ${s.name} <span style="font-size:0.8rem; color:#666;">(Grp ${s.group})</span>
+                      </div>`; 
+           }); 
+        }
             
         html += `</div></div>`;
-
         
 
         document.getElementById('view-attendance-screen').innerHTML = html;
