@@ -83,8 +83,8 @@
     </div>
     <div class="button-grid" style="grid-template-columns: 1fr; gap: 10px;">
       <button class="list-btn" onclick="openMarkRegister()" style="justify-content: center;"> Mark Register</button>
-      <button class="list-btn" onclick="openViewAttendance()" style="justify-content: center;"> View Records</button>
-      <button class="list-btn" onclick="openAttendanceStats()" style="justify-content: center;"> Attendance Stats</button>
+      <button class="list-btn" onclick="openViewAttendance()" style="justify-content: center;"> View Attendance Records</button>
+      <button class="list-btn" onclick="openAttendanceStats()" style="justify-content: center;"> View Attendance Stats</button>
     </div>
   </div>
 
@@ -294,7 +294,17 @@
 
     function renderAttendanceScreen() {
       const today = new Date().toISOString().split('T')[0];
-      let html = `<div class="nav-header"><h2 class="nav-title">Attendance</h2><button class="back-btn" onclick="showScreen('attendance-dashboard')">Back</button></div><input type="date" id="attendance-date" value="${today}" style="width: 90%; margin-bottom: 15px; font-family: sans-serif; text-align: center;">`;
+      let html = `<div class="nav-header"><h2 class="nav-title">Attendance</h2>
+      <button class="back-btn" onclick="showScreen('attendance-dashboard')">Back</button>
+
+<div style="display: flex; align-items: center; justify-content: space-between; width: 100%; font-family: sans-serif; margin-bottom: 15px;">    
+    <!-- Date Input Aligned Left -->
+    <input type="date" id="attendance-date" value="${today}" style="width: 60%; font-family: sans-serif; text-align: center;">
+    
+    <!-- DATE Label Aligned Right -->
+    <span style="color: teal; font-weight: bold; font-family: gagalin ;margin-left: auto;">DATE</span>
+
+</div>`;
       let currentGroupHeader = "";
       let sortedStudents = [...allStudents].sort((a, b) => { if (a.group === b.group) return a.name.localeCompare(b.name); return a.group.localeCompare(b.group, undefined, {numeric: true}); });
       sortedStudents.forEach(s => {
@@ -378,13 +388,25 @@
         padding:10px;
         border-radius:8px;
       ">
-        <input type="date"
-          id="view-start-date"
-          value="${startDate}">
+      
+<div style="display: flex; align-items: center; justify-content: space-between; width: 100%; font-family: sans-serif; margin-bottom: 15px;">    
+    <!-- Date Input Aligned Left -->
+    <input type="date" id="view-start-date" value="${startDate}" style="width: 50%; font-family: sans-serif; text-align: center;">
+    
+    <!-- DATE Label Aligned Right -->
+    <span style="color: teal; font-weight: bold; font-family: gagalin ;margin-left: auto;">START DATE</span>
 
-        <input type="date"
-          id="view-end-date"
-          value="${endDate}">
+</div>
+       
+<div style="display: flex; align-items: center; justify-content: space-between; width: 100%; font-family: sans-serif; margin-bottom: 15px;">    
+    <!-- Date Input Aligned Left -->
+    <input type="date" id="view-end-date" value="${endDate}" style="width: 50%; font-family: sans-serif; text-align: center;">
+    
+    <!-- DATE Label Aligned Right -->
+    <span style="color: teal; font-weight: bold; font-family: gagalin ;margin-left: auto;">END DATE</span>
+
+</div>;
+      
 
         <button onclick="
           renderViewAttendanceScreen(
