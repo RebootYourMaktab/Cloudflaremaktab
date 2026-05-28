@@ -292,19 +292,27 @@
       renderAttendanceScreen();
     }
 
-    function renderAttendanceScreen() {
-      const today = new Date().toISOString().split('T')[0];
-      let html = `<div class="nav-header"><h2 class="nav-title">Attendance</h2>
-      <button class="back-btn" onclick="showScreen('attendance-dashboard')">Back</button>
+   function renderAttendanceScreen() {
+  showScreen('view-attendance-screen');
 
-<div style="display: flex; align-items: center; justify-content: space-between; width: 100%; font-family: sans-serif; margin-bottom: 15px;">    
-    <!-- Date Input Aligned Left -->
-    <input type="date" id="attendance-date" value="${today}" style="width: 60%; font-family: sans-serif; text-align: center;">
-    
-    <!-- DATE Label Aligned Right -->
-    <span style="color: teal; font-weight: bold; font-family: gagalin ;margin-left: auto;">DATE</span>
+  const today = new Date().toISOString().split('T')[0];
 
-</div>`
+  let html = `
+    <div class="nav-header">
+      <h2 class="nav-title">Attendance</h2>
+      <button class="back-btn" onclick="showScreen('attendance-dashboard')">
+        Back
+      </button>
+    </div>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; width:100%; font-family:sans-serif; margin-bottom:15px;">
+      <input type="date" id="attendance-date" value="${today}" style="width:60%; font-family:sans-serif; text-align:center;">
+      <span style="color:teal; font-weight:bold; font-family:gagalin; margin-left:auto;">
+        DATE
+      </span>
+    </div>
+  `;
+  
       let currentGroupHeader = "";
       let sortedStudents = [...allStudents].sort((a, b) => { if (a.group === b.group) return a.name.localeCompare(b.name); return a.group.localeCompare(b.group, undefined, {numeric: true}); });
       sortedStudents.forEach(s => {
@@ -367,15 +375,11 @@
     // Format month title
     const startObj = new Date(startDate);
 
-    const monthTitle =
-      startObj.toLocaleString('default', {
-        month: 'long',
-        year: 'numeric'
-      });
+
 
     let html = `
       <div class="nav-header">
-        <h2 class="nav-title">Attendance: ${monthTitle}</h2>
+        <h2 class="nav-title">View Attendance for a date range  </h2>
         <button class="back-btn"
           onclick="showScreen('attendance-dashboard')">
           Back
@@ -405,7 +409,7 @@
     <!-- DATE Label Aligned Right -->
     <span style="color: teal; font-weight: bold; font-family: gagalin ;margin-left: auto;">END DATE</span>
 
-</div>;
+</div>
       
 
         <button onclick="
@@ -440,7 +444,7 @@
           ATT %
         </div>
       </div>
-    `;
+    `
 
     // Sort groups numerically
     const sortedGroups = Object.keys(groups)
@@ -461,11 +465,10 @@
         ">
           GROUP ${groupNo}
         </div>
-      `;
+      `
 
       groups[groupNo].forEach(student => {
 
-const rowColor = 'teal';          
         html += `
           <div
             onclick="toggleAbsentDates('${student.pin}')"
