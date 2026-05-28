@@ -406,15 +406,15 @@
         border-bottom:2px solid teal;
         z-index:10;
       ">
-        <div style="width:50%; text-align:left;">
+        <div style="width:60%; text-align:left;">
           NAME
         </div>
 
         <div style="width:25%; text-align:center;">
-          ABSENT
+          DAY ABSENT
         </div>
 
-        <div style="width:25%; text-align:right;">
+        <div style="width:15%; text-align:right;">
           ATT %
         </div>
       </div>
@@ -431,7 +431,7 @@
       html += `
         <div style="
           background-color:teal;
-          color:white;
+          color:whitesmoke;
           padding:8px;
           margin-top:10px;
           border-radius:5px;
@@ -448,8 +448,8 @@ const rowColor = 'teal';
           <div
             onclick="toggleAbsentDates('${student.pin}')"
             style="
-              background-color:silver;
-              color:white;
+              background-color:gray;
+              color:teal;
               padding:10px;
               margin-top:2px;
               border-radius:4px;
@@ -465,7 +465,7 @@ const rowColor = 'teal';
               ${student.name}
             </div>
             <div style="
-              width:15%;
+              width:25%;
               text-align:center;
               color:teal
             ">
@@ -485,7 +485,7 @@ const rowColor = 'teal';
             style="
               display:none;
               padding:10px;
-              background:#555;
+              background:grey;
               color:#ddd;
               font-size:0.85rem;
               border-radius:0 0 5px 5px;
@@ -497,7 +497,7 @@ const rowColor = 'teal';
               `
               <div style="
                 margin-bottom:6px;
-                color:white;  
+                color:whitesmoke;  
               ">
                 Absent Dates
               </div>
@@ -559,21 +559,28 @@ function renderAttendanceStatsScreen(startDate, endDate) {
 
         const totalDays = data.totalDays || 0;
         const groups = data.groups || {};
-        let totalStudents = 0, totalAbsences = 0, perfectStudents = [], groupStats = [];
+        // 1. Crunch the Numbers
+        let totalStudents = 0;
+        let totalAbsences = 0;
+        let perfectStudents = [];
+        let groupStats = [];
+        
+        // FIX: Pre-initialize these so the code never throws "Can't find variable"
+        let classPercent = 0;
 
         Object.keys(groups).forEach(groupNo => {
           let groupStudents = groups[groupNo].length;
           let groupAbsences = 0;
+          
           groups[groupNo].forEach(student => {
             totalStudents++;
             totalAbsences += student.absentCount;
             groupAbsences += student.absentCount;
             
-            // Collect students with 0 absences, keeping their Group info
             if (student.absentCount === 0 && totalDays > 0) {
               perfectStudents.push({ 
                 name: student.name, 
-                group: parseInt(groupNo) // Store group as number for sorting
+                group: parseInt(groupNo) 
               });
             }
           });
@@ -583,14 +590,17 @@ function renderAttendanceStatsScreen(startDate, endDate) {
           groupStats.push({ group: groupNo, percent: groupPercent });
         });
 
-        // 2. SORTING: Group (Numeric), then Name (Alphabetical)
+        // FIX: Calculate it here, now it is in scope for the whole function
+        let classPossible = totalStudents * totalDays;
+        classPercent = classPossible > 0 ? Math.round(((classPossible - totalAbsences) / classPossible) * 100) : 0;
+        
         perfectStudents.sort((a, b) => {
-          if (a.group !== b.group) {
-            return a.group - b.group; // Sort by group number
-          }
-          return a.name.localeCompare(b.name); // Then sort by name
+          if (a.group !== b.group) return a.group - b.group;
+          return a.name.localeCompare(b.name);
         });
 
+        // Now, when the HTML template below runs, classPercent will be ready for it.
+      
         let html = `
           <div class="nav-header">
             <h2 class="nav-title">Statistics</h2>
