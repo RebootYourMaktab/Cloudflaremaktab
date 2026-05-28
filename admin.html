@@ -443,12 +443,8 @@
 
       groups[groupNo].forEach(student => {
 
-        const rowColor =
-          student.attendancePercent >= 90
-            ? 'limegreen'
-            : student.attendancePercent >= 75
-            ? 'Whitemoke'
-            : 'gold';
+        const rowColor = teal
+          
 
         html += `
           <div
@@ -466,26 +462,24 @@
           >
 
             <div style="
-              width:50%;
+              width:70%;
               text-align:left;
-              font-weight:bold;
             ">
               ${student.name}
             </div>
 
             <div style="
-              width:25%;
+              width:15%;
               text-align:center;
-              color:gold;
-              font-weight:bold;
+              color:teal;
+            
             ">
               ${student.absentCount}
             </div>
 
             <div style="
-              width:25%;
-              text-align:right;
-              font-weight:bold;
+              width:15%;
+              text-align:center;
               color:${rowColor};
             ">
               ${student.attendancePercent}%
