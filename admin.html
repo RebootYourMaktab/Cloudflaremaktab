@@ -443,9 +443,7 @@
 
       groups[groupNo].forEach(student => {
 
-        const rowColor = teal
-          
-
+const rowColor = 'teal';          
         html += `
           <div
             onclick="toggleAbsentDates('${student.pin}')"
@@ -460,23 +458,19 @@
               align-items:center;
             "
           >
-
             <div style="
               width:70%;
               text-align:left;
             ">
               ${student.name}
             </div>
-
             <div style="
               width:15%;
               text-align:center;
-              color:teal;
-            
+              color:teal
             ">
               ${student.absentCount}
             </div>
-
             <div style="
               width:15%;
               text-align:center;
@@ -484,7 +478,6 @@
             ">
               ${student.attendancePercent}%
             </div>
-
           </div>
 
           <div
@@ -498,19 +491,16 @@
               border-radius:0 0 5px 5px;
             "
           >
-
             ${
               student.absentDates.length > 0
               ?
               `
               <div style="
                 margin-bottom:6px;
-                color:white;
-            
+                color:white;  
               ">
                 Absent Dates
               </div>
-
               ${student.absentDates.map(date => `
                 <div style="
                   padding:4px 0;
@@ -518,9 +508,7 @@
                 ">
                   ${new Date(date).toLocaleDateString()}
                 </div>
-              `).join('')}
-              `
-              :
+              `).join('')}`:
               `<div>No absences recorded</div>`
             }
 
@@ -580,18 +568,28 @@ function renderAttendanceStatsScreen(startDate, endDate) {
             totalStudents++;
             totalAbsences += student.absentCount;
             groupAbsences += student.absentCount;
+            
+            // Collect students with 0 absences, keeping their Group info
             if (student.absentCount === 0 && totalDays > 0) {
-              perfectStudents.push(`${student.name} <span style="font-size:0.8rem; color:teal;">(Grp ${groupNo})</span>`);
+              perfectStudents.push({ 
+                name: student.name, 
+                group: parseInt(groupNo) // Store group as number for sorting
+              });
             }
           });
+          
           let groupPossible = groupStudents * totalDays;
           let groupPercent = groupPossible > 0 ? Math.round(((groupPossible - groupAbsences) / groupPossible) * 100) : 0;
           groupStats.push({ group: groupNo, percent: groupPercent });
         });
 
-        let classPossible = totalStudents * totalDays;
-        let classPercent = classPossible > 0 ? Math.round(((classPossible - totalAbsences) / classPossible) * 100) : 0;
-        perfectStudents.sort();
+        // 2. SORTING: Group (Numeric), then Name (Alphabetical)
+        perfectStudents.sort((a, b) => {
+          if (a.group !== b.group) {
+            return a.group - b.group; // Sort by group number
+          }
+          return a.name.localeCompare(b.name); // Then sort by name
+        });
 
         let html = `
           <div class="nav-header">
@@ -647,13 +645,7 @@ function renderAttendanceStatsScreen(startDate, endDate) {
             
         html += `</div></div>`;
 
-        // DIAGNOSTIC BOX
-        if (data.debug && data.debug.length > 0) {
-          html += `<div style="margin-top: 20px; padding: 10px; background: #222; color: #0f0; font-family: monospace; font-size: 0.8rem; border-radius: 5px; text-align:left;">
-            <strong>System Diagnostics (First 5 Rows Checked):</strong><br>
-            ${data.debug.join('<br><br>')}
-          </div>`;
-        }
+        
 
         document.getElementById('view-attendance-screen').innerHTML = html;
 
