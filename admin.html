@@ -425,7 +425,9 @@
       .sort((a, b) => Number(a) - Number(b));
 
     sortedGroups.forEach(groupNo => {
-
+    
+      
+      // group headings
       html += `
         <div style="
           background-color:teal;
@@ -443,16 +445,16 @@
 
         const rowColor =
           student.attendancePercent >= 90
-            ? '#2e7d32'
+            ? 'limegreen'
             : student.attendancePercent >= 75
-            ? '#ef6c00'
-            : '#c62828';
+            ? 'Whitemoke'
+            : 'gold';
 
         html += `
           <div
             onclick="toggleAbsentDates('${student.pin}')"
             style="
-              background-color:#696969;
+              background-color:silver;
               color:white;
               padding:10px;
               margin-top:2px;
@@ -474,7 +476,7 @@
             <div style="
               width:25%;
               text-align:center;
-              color:#ffd54f;
+              color:gold;
               font-weight:bold;
             ">
               ${student.absentCount}
@@ -510,7 +512,7 @@
               <div style="
                 margin-bottom:6px;
                 color:white;
-                font-weight:bold;
+            
               ">
                 Absent Dates
               </div>
@@ -533,21 +535,7 @@
       });
     });
 
-    // Summary footer
-    html += `
-      <div style="
-        margin-top:20px;
-        padding:12px;
-        background:#004c4c;
-        color:white;
-        border-radius:8px;
-        text-align:center;
-        font-weight:bold;
-      ">
-        Total Attendance Days: ${totalDays}
-      </div>
-    `;
-
+    
     document.getElementById('view-attendance-screen').innerHTML = html;
 
   }).catch(err => {
