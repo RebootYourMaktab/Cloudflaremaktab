@@ -560,7 +560,133 @@ function toggleAbsentDates(pin) {
 }
     
 
-    function openAttendanceStats() { alert('Stats coming soon!'); }
+   function openAttendanceStats() {
+      // Reuses the date range function we built for View Attendance
+      const range = getDefaultDateRange(); 
+      renderAttendanceStatsScreen(range.start, range.end);
+    }
+
+    function renderAttendanceStatsScreen(startDate, endDate) {
+      document.getElementById('view-attendance-screen').innerHTML = 
+        `<h3 style="text-align:center;">Calculating Stats...</h3>`;
+      showScreen('view-attendance-screen');
+
+      // Call our existing backend API
+      apiCall({ action: 'getAttendanceReport', startDate: startDate, endDate: endDate }).then(data => {
+        if (!data.success) {
+          document.getElementById('view-attendance-screen').innerHTML = `<h3>Error loading stats</h3>`;
+          return;
+        }
+
+        const totalDays = data.totalDays;
+        const groups = data.groups;
+        
+        let totalStudents = 0;
+        let totalAbsences = 0;
+        let perfectStudents = [];
+        let groupStats = [];
+
+        // 1. Crunch the Numbers
+        Object.keys(groups).forEach(groupNo => {
+          let groupStudents = groups[groupNo].length;
+          let groupAbsences = 0;
+          
+          groups[groupNo].forEach(student => {
+            totalStudents++;
+            totalAbsences += student.absentCount;
+            groupAbsences += student.absentCount;
+            
+            // Check for 100% attendance (0 absences)
+            if (student.absentCount === 0 && totalDays > 0) {
+              perfectStudents.push(`${student.name} <span style="font-size:0.8rem; color:teal;">(Grp ${groupNo})</span>`);
+            }
+          });
+          
+          // Calculate Group %
+          let groupPossible = groupStudents * totalDays;
+          let groupPercent = groupPossible > 0 ? Math.round(((groupPossible - groupAbsences) / groupPossible) * 100) : 0;
+          groupStats.push({ group: groupNo, percent: groupPercent });
+        });
+
+        // Calculate Whole Class %
+        let classPossible = totalStudents * totalDays;
+        let classPercent = classPossible > 0 ? Math.round(((classPossible - totalAbsences) / classPossible) * 100) : 0;
+
+        // Sort 100% students alphabetically
+        perfectStudents.sort();
+
+        // 2. Build the HTML Screen
+        let html = `
+          <div class="nav-header">
+            <h2 class="nav-title">Statistics</h2>
+            <button class="back-btn" onclick="showScreen('attendance-dashboard')">Back</button>
+          </div>
+          
+          <div style="margin-bottom:15px; background:WhiteSmoke; padding:10px; border-radius:8px;">
+            <input type="date" id="stats-start-date" value="${startDate}">
+            <input type="date" id="stats-end-date" value="${endDate}">
+            <button onclick="renderAttendanceStatsScreen(
+              document.getElementById('stats-start-date').value, 
+              document.getElementById('stats-end-date').value
+            )">Filter</button>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+            <div style="background: teal; color: white; padding: 15px; border-radius: 8px; text-align: center;">
+              <h4 style="margin-bottom: 5px; color: WhiteSmoke;">Maktab Days</h4>
+              <div style="font-size: 2.2rem; font-weight: bold; font-family: sans-serif;">${totalDays}</div>
+            </div>
+            <div style="background: #006666; color: white; padding: 15px; border-radius: 8px; text-align: center;">
+              <h4 style="margin-bottom: 5px; color: WhiteSmoke;">Class %</h4>
+              <div style="font-size: 2.2rem; font-weight: bold; font-family: sans-serif;">${totalDays > 0 ? classPercent + '%' : '-'}</div>
+            </div>
+          </div>
+          
+          <div class="dashboard-section" style="background-color: #f5f5f5;">
+            <h3 style="color: teal;">Group Breakdown</h3>`;
+            
+        // Sort groups numerically and generate progress bars
+        groupStats.sort((a,b) => Number(a.group) - Number(b.group)).forEach(stat => {
+          let barColor = stat.percent >= 90 ? '#2e7d32' : stat.percent >= 75 ? '#ef6c00' : '#c62828';
+          html += `
+            <div style="margin-bottom: 12px;">
+              <div style="display: flex; justify-content: space-between; font-weight: bold; font-family: sans-serif; color: #424242; font-size: 0.9rem;">
+                <span>Group ${stat.group}</span>
+                <span>${totalDays > 0 ? stat.percent + '%' : '-'}</span>
+              </div>
+              <div style="background: #e0e0e0; height: 8px; border-radius: 4px; margin-top: 4px; overflow: hidden;">
+                <div style="width: ${stat.percent}%; background: ${barColor}; height: 100%;"></div>
+              </div>
+            </div>`;
+        });
+            
+        html += `</div>
+          
+          <div class="dashboard-section" style="background-color: #f5f5f5;">
+            <h3 style="color: teal; margin-bottom: 10px;">100% Attendance 🏆</h3>
+            <div style="background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 8px; padding: 10px; max-height: 250px; overflow-y: auto;">`;
+            
+        if (totalDays === 0) {
+           html += `<div style="text-align: center; color: #666; font-family: sans-serif; padding: 10px;">No days recorded in this period.</div>`;
+        } else if (perfectStudents.length === 0) {
+           html += `<div style="text-align: center; color: #666; font-family: sans-serif; padding: 10px;">No students have 100% attendance.</div>`;
+        } else {
+           perfectStudents.forEach(student => {
+             html += `<div style="padding: 8px 5px; border-bottom: 1px dashed #a5d6a7; font-family: sans-serif; font-weight: bold; color: #2e7d32;">
+                        ⭐ ${student}
+                      </div>`;
+           });
+        }
+            
+        html += `</div></div>`;
+        
+        document.getElementById('view-attendance-screen').innerHTML = html;
+
+      }).catch(err => {
+        document.getElementById('view-attendance-screen').innerHTML = `<h3>Failed to load stats</h3>`;
+        console.error(err);
+      });
+    }
   </script>
 </body>
 </html>
