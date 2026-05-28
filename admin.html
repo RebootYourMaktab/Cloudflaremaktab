@@ -304,7 +304,7 @@
     <!-- DATE Label Aligned Right -->
     <span style="color: teal; font-weight: bold; font-family: gagalin ;margin-left: auto;">DATE</span>
 
-</div>`;
+</div>`
       let currentGroupHeader = "";
       let sortedStudents = [...allStudents].sort((a, b) => { if (a.group === b.group) return a.name.localeCompare(b.name); return a.group.localeCompare(b.group, undefined, {numeric: true}); });
       sortedStudents.forEach(s => {
